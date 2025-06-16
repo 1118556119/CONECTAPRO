@@ -445,26 +445,58 @@ export default {
 
         console.log('Respuesta del servidor:', response.data);
 
-        if (response.data.success && response.data.data && response.data.data.token) {
-          localStorage.setItem('token', response.data.data.token);
-          localStorage.setItem('user_type', response.data.data.user_type);
+        if (response.data.success) {
+            // MANEJAR CASO DE VERIFICACIÓN REQUERIDA
+            if (response.data.data.requires_verification) {
+                await Swal.fire({
+                    icon: 'info',
+                    title: '¡Registro casi completo!',
+                    html: `
+                        <div class="text-center">
+                            <p>Tu cuenta ha sido creada exitosamente.</p>
+                            <p><strong>Ahora debes verificar tu email:</strong></p>
+                            <p class="text-primary">${this.form.email}</p>
+                            <p class="text-muted small">Revisa tu bandeja de entrada y haz clic en el enlace de verificación.</p>
+                        </div>
+                    `,
+                    confirmButtonText: 'Entendido',
+                    showCancelButton: true,
+                    cancelButtonText: 'Reenviar correo'
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        this.resendVerificationEmail();
+                    }
+                });
 
-          await Swal.fire({
-            icon: 'success',
-            title: '¡Registro exitoso!',
-            text: `Tu cuenta de ${this.form.user_type === 'client' ? 'Cliente' : 'Técnico'} ha sido creada correctamente`,
-            timer: 2000,
-            showConfirmButton: false
-          });
+                // Redirigir a login con mensaje
+                this.$router.push({
+                    path: '/login',
+                    query: { message: 'verify_email', email: this.form.email }
+                });
+            } else {
+                // Caso normal (si no requiere verificación)
+                const userData = response.data.data;
+                
+                localStorage.setItem('token', userData.token);
+                localStorage.setItem('user_type', userData.user_type);
 
-          if (this.form.user_type === 'technician') {
-            this.$router.push('/profile');
-          } else {
-            this.$router.push('/dashboard');
-          }
+                await Swal.fire({
+                    icon: 'success',
+                    title: '¡Registro exitoso!',
+                    text: `Tu cuenta de ${this.form.user_type === 'client' ? 'Cliente' : 'Técnico'} ha sido creada correctamente`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                if (this.form.user_type === 'technician') {
+                    this.$router.push('/profile');
+                } else {
+                    this.$router.push('/dashboard');
+                }
+            }
         } else {
-          this.error = 'Respuesta del servidor inválida';
-          console.error('Respuesta inesperada:', response.data);
+            this.error = 'Respuesta del servidor inválida';
+            console.error('Respuesta inesperada:', response.data);
         }
 
       } catch (error) {
@@ -504,6 +536,29 @@ export default {
       } finally {
         this.isLoading = false;
       }
+    },
+
+    async resendVerificationEmail() {
+        try {
+            const response = await axios.post('/email/resend', {
+                email: this.form.email
+            });
+
+            if (response.data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Correo reenviado',
+                    text: 'Hemos reenviado el email de verificación a tu correo.',
+                    timer: 3000
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo reenviar el correo de verificación.'
+            });
+        }
     },
 
     registerWithGoogle() {

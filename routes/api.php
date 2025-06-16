@@ -8,10 +8,14 @@ use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TechnicianProfileController;
+use App\Http\Controllers\EmailVerificationController;
 
 // Rutas públicas
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Rutas de verificación de email
+Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
 
 // Rutas protegidas
 Route::middleware('auth:sanctum')->group(function () {
@@ -59,6 +63,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount']);
     Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead']);
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    
+    // Verificación de email
+    Route::post('/email/verify', [EmailVerificationController::class, 'sendVerificationEmail']);
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify']);
 });
 
 // Rutas de salud/estado del API

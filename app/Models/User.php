@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail; // ← AGREGAR ESTA LÍNEA
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Carbon\Carbon;
 use App\Helpers\ImageHelper;
+use App\Notifications\CustomVerifyEmail;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail // ← IMPLEMENTAR INTERFAZ
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -27,6 +29,7 @@ class User extends Authenticatable
         'city',
         'postal_code',
         'is_active',
+        'email_verified_at', // ← AGREGAR ESTE CAMPO
     ];
 
     protected $hidden = [
@@ -35,7 +38,7 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at' => 'datetime', // ← AGREGAR CAST
         'password' => 'hashed',
         'birthDate' => 'date',        
         'is_active' => 'boolean',
@@ -136,6 +139,49 @@ class User extends Authenticatable
     public function getPhotoUrlAttribute()
     {
         return ImageHelper::getPhotoUrl($this->photo);
+    }
+
+    /**
+     * Verificar si el email ha sido verificado
+     */
+    public function hasVerifiedEmail()
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Marcar el email como verificado Y activar usuario automáticamente
+     */
+    public function markEmailAsVerified()
+    {
+        return $this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+            'is_active' => true, // ← ACTIVAR AUTOMÁTICAMENTE
+        ])->save();
+    }
+
+    /**
+     * Obtener el email para verificación
+     */
+    public function getEmailForVerification()
+    {
+        return $this->email;
+    }
+
+    /**
+     * Accessor para estado de verificación
+     */
+    public function getIsEmailVerifiedAttribute()
+    {
+        return $this->hasVerifiedEmail();
+    }
+
+    /**
+     * Enviar notificación de verificación personalizada
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail);
     }
 
     // Scopes

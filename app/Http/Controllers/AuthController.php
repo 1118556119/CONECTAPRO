@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\TechnicianProfile;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse; // ← ASEGÚRATE DE TENER ESTA IMPORTACIÓN
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -13,72 +13,115 @@ use Illuminate\Support\Facades\Storage;
 use App\Helpers\ImageHelper;
 use Exception;
 
-/**
- * Controlador para manejar la autenticación de usuarios (registro, inicio de sesión y cierre de sesión).
- * Este controlador utiliza Laravel Sanctum para la generación de tokens de autenticación.
- */
 class AuthController extends Controller
 {
     /**
      * Registra un nuevo usuario en el sistema.
-     *
-     * @param Request $request Contiene los datos enviados desde el formulario de registro (name, idNumber, phone, birthDate, gender, email, password).
-     * @return \Illuminate\Http\JsonResponse Respuesta JSON con el token de autenticación y los datos del usuario, o un error si falla.
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'idNumber' => 'required|string|max:20|unique:users',
-            'phone' => 'required|string|max:20',
-            'gender' => 'required|in:male,female,other',
-            'birthDate' => 'required|date|before:today',
-            'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif,bmp,svg,webp|max:5120',
-        ]);
+        try {
+            // Validación
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+                'idNumber' => 'required|string|max:20|unique:users,idNumber',
+                'phone' => 'required|string|max:20',
+                'gender' => 'required|in:male,female,other',
+                'birthDate' => 'required|date|before:today',
+                'user_type' => 'required|in:client,technician',
+                'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif,bmp,svg,webp|max:5120',
+            ]);
 
-        $photoPath = null;
-        if ($request->hasFile('photo')) {
-            try {
-                if (extension_loaded('gd')) {
-                    $photoPath = ImageHelper::processAndResizeProfilePhoto($request->file('photo'));
-                } else {
-                    $photoPath = ImageHelper::processProfilePhoto($request->file('photo'));
-                }
-            } catch (\Exception $e) {
+            if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error al procesar la imagen: ' . $e->getMessage()
+                    'message' => 'Error de validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Procesar foto si existe
+            $photoPath = null;
+            if ($request->hasFile('photo')) {
+                try {
+                    if (extension_loaded('gd')) {
+                        $photoPath = ImageHelper::processAndResizeProfilePhoto($request->file('photo'));
+                    } else {
+                        $photoPath = ImageHelper::processProfilePhoto($request->file('photo'));
+                    }
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error al procesar la imagen: ' . $e->getMessage()
+                    ], 400);
+                }
+            }
+
+            // Crear usuario
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'idNumber' => $request->idNumber,
+                'phone' => $request->phone,
+                'gender' => $request->gender,
+                'birthDate' => $request->birthDate,
+                'user_type' => $request->user_type,
+                'photo' => $photoPath,
+                'is_active' => false, // ← CAMBIAR A FALSE hasta verificar email
+                'email_verified_at' => null, // ← Email no verificado inicialmente
+            ]);
+
+            // Si es técnico, crear perfil técnico
+            if ($request->user_type === 'technician') {
+                TechnicianProfile::create([
+                    'user_id' => $user->id,
+                    'bio' => null,
+                    'experience_years' => 0,
+                    'hourly_rate' => null,
+                    'is_verified' => false,
+                    'is_available' => true,
+                    'profile_completeness' => $this->calculateInitialCompleteness($request),
                 ]);
             }
+
+            // ENVIAR EMAIL DE VERIFICACIÓN
+            $user->sendEmailVerificationNotification();
+
+            // NO CREAR TOKEN AÚN - el usuario debe verificar primero
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario registrado exitosamente. Por favor verifica tu email antes de iniciar sesión.',
+                'data' => [
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'user_type' => $user->user_type,
+                        'email_verified' => false,
+                    ],
+                    'requires_verification' => true
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            \Log::error('Error en registro: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'idNumber' => $request->idNumber,
-            'phone' => $request->phone,
-            'gender' => $request->gender,
-            'birthDate' => $request->birthDate,
-            'photo' => $photoPath,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Usuario registrado correctamente',
-            'user' => $user
-        ]);
     }
 
     /**
      * Inicia sesión de un usuario existente.
-     *
-     * @param Request $request Contiene las credenciales (email y password) del usuario.
-     * @return \Illuminate\Http\JsonResponse Respuesta JSON con el token y datos del usuario
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -103,6 +146,16 @@ class AuthController extends Controller
                 ], 401);
             }
 
+            // VERIFICAR SI EL EMAIL ESTÁ VERIFICADO
+            if (!$user->hasVerifiedEmail()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debes verificar tu email antes de iniciar sesión',
+                    'requires_verification' => true,
+                    'user_email' => $user->email
+                ], 403);
+            }
+
             if (!$user->is_active) {
                 return response()->json([
                     'success' => false,
@@ -116,17 +169,15 @@ class AuthController extends Controller
             // Generar token
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            // ⚠️ CORREGIDO: Cargar relaciones
+            // Cargar relaciones
             $userWithProfile = $user->load('technicianProfile');
-
-            \Log::info('Usuario logueado:', $userWithProfile->toArray());
 
             return response()->json([
                 'success' => true,
                 'message' => 'Login exitoso',
                 'data' => [
-                    'token' => $token,
                     'user' => $userWithProfile,
+                    'token' => $token,
                     'user_type' => $userWithProfile->user_type,
                 ]
             ]);
@@ -510,7 +561,8 @@ class AuthController extends Controller
         $completeness = 20; // Base por registro
         
         if ($request->phone) $completeness += 10;
-        if ($request->city) $completeness += 10;
+        if ($request->birthDate) $completeness += 10;
+        if ($request->gender) $completeness += 10;
         
         return min($completeness, 100);
     }
