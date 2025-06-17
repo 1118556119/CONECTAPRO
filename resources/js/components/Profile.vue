@@ -7,9 +7,10 @@
           <!-- Avatar y nombre del usuario -->
           <div class="text-center mb-4">
             <div class="position-relative d-inline-block">
-              <img :src="profileData.photo || '/img/avatar.png'" 
+              <!-- ✅ SIMPLIFICAR esta línea -->
+              <img :src="generateSimpleAvatar()" 
                    alt="Avatar del usuario"
-                   class="img-fluid rounded-circle mb-2 border"
+                   class="img-fluid rounded-circle mb-2 border profile-photo"
                    style="width: 100px; height: 100px; object-fit: cover;">
               
               <!-- Botón para cambiar foto -->
@@ -289,6 +290,8 @@ export default {
       globalLoading: true,
       loading: false,
       activeSection: 'personal',
+      photoLoadError: false,
+      localPhotoBase64: null, // ✅ NUEVA VARIABLE
       
       // Datos del perfil - usando nombres exactos
       profileData: {
@@ -346,6 +349,16 @@ export default {
   async mounted() {
     await this.fetchProfile();
     await this.fetchNotifications();
+    
+    // Debug: Ver qué contiene la foto
+    this.$nextTick(() => {
+      console.log('🔍 Debug foto:', {
+        photo: this.profileData.photo,
+        photoType: typeof this.profileData.photo,
+        isBase64: this.profileData.photo?.startsWith('data:image'),
+        photoLength: this.profileData.photo?.length
+      });
+    });
   },
 
   methods: {
@@ -378,6 +391,10 @@ export default {
           userData = response.data;
         }
 
+        // ✅ GUARDAR LA FOTO ACTUAL
+        const currentPhoto = this.profileData.photo;
+        const hasLocalPhoto = this.localPhotoBase64 !== null;
+
         // Mapear campos con nombres correctos
         this.profileData = {
           id: userData.id || null,
@@ -392,9 +409,9 @@ export default {
           city: userData.city || '',
           address: userData.address || '',
           postal_code: userData.postal_code || '',
-          photo: userData.photo || userData.photo_url || '',
+          // ✅ MANTENER LA FOTO LOCAL SI EXISTE
+          photo: hasLocalPhoto ? currentPhoto : (userData.photo || userData.photo_url || ''),
           
-          // Asegurar que education y experience sean arrays
           education: Array.isArray(userData.education) ? userData.education : 
                      Array.isArray(userData.educations) ? userData.educations : [],
           
@@ -403,6 +420,11 @@ export default {
         };
 
         console.log('✅ Datos del perfil procesados:', this.profileData);
+        
+        // ✅ VERIFICAR si tenemos foto local y mostrar mensaje
+        if (hasLocalPhoto) {
+          console.log('🖼️ Manteniendo foto local base64 después de fetchProfile');
+        }
 
         // Cargar servicios si es cliente
         if (this.profileData.user_type === 'client') {
@@ -509,8 +531,10 @@ export default {
       try {
         this.loading = true;
         
+        // ✅ GUARDAR LA IMAGEN BASE64 SI EXISTE
+        const savedBase64Photo = this.profileData.photo?.startsWith('data:image') ? this.profileData.photo : null;
+        
         const formData = new FormData();
-        // Usar los nombres de campos que el controlador espera
         formData.append('name', this.profileData.name || '');
         formData.append('idNumber', this.profileData.idNumber || '');
         formData.append('phone', this.profileData.phone || '');
@@ -520,23 +544,9 @@ export default {
         formData.append('address', this.profileData.address || '');
         formData.append('postal_code', this.profileData.postal_code || '');
 
-        // Solo agregar foto si hay una seleccionada
         if (this.selectedFile) {
           formData.append('photo', this.selectedFile);
         }
-
-        console.log('📤 Enviando datos personales:', {
-          name: this.profileData.name,
-          idNumber: this.profileData.idNumber,
-          phone: this.profileData.phone,
-          birthDate: this.profileData.birthDate,
-          gender: this.profileData.gender,
-          city: this.profileData.city,
-          address: this.profileData.address,
-          postal_code: this.profileData.postal_code,
-          hasPhoto: !!this.selectedFile,
-          formDataKeys: Array.from(formData.keys())
-        });
 
         const response = await this.saveToServer(formData);
         
@@ -549,8 +559,11 @@ export default {
           Object.assign(this.profileData, response.data.user);
         }
         
-        // Refrescar datos desde el servidor para asegurar consistencia
-        await this.fetchProfile();
+        // ✅ RESTAURAR LA IMAGEN BASE64 SI HABÍA UNA
+        if (savedBase64Photo) {
+          this.profileData.photo = savedBase64Photo;
+          console.log('💾 Restaurando foto base64 después de guardar');
+        }
         
         this.editingPersonal = false;
         this.selectedFile = null;
@@ -558,30 +571,7 @@ export default {
 
       } catch (error) {
         console.error('❌ Error saving personal info:', error);
-        
-        if (error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-          
-          if (error.response.status === 422) {
-            const errors = error.response.data.errors || {};
-            console.error('Validation errors:', errors);
-            
-            const errorMessages = [];
-            Object.keys(errors).forEach(field => {
-              const fieldErrors = Array.isArray(errors[field]) ? errors[field] : [errors[field]];
-              errorMessages.push(...fieldErrors);
-            });
-            
-            const errorMessage = errorMessages.length > 0 ? 
-                                errorMessages.join(', ') : 'Error de validación';
-            this.showMessage(errorMessage, 'alert-danger');
-          } else {
-            this.showMessage('Error al guardar la información personal', 'alert-danger');
-          }
-        } else {
-          this.showMessage('Error de conexión al guardar', 'alert-danger');
-        }
+        this.showMessage('Error al guardar la información personal', 'alert-danger');
       } finally {
         this.loading = false;
       }
@@ -593,6 +583,7 @@ export default {
       this.selectedFile = null;
     },
 
+    // ✅ MODIFICAR el método onFileChange para guardar la foto base64
     onFileChange(event) {
       const file = event.target.files[0];
       if (file) {
@@ -608,10 +599,21 @@ export default {
         
         this.selectedFile = file;
         
-        // Mostrar preview inmediatamente
+        console.log('📸 Archivo seleccionado:', file.name, file.type, file.size);
+        
+        // Mostrar preview inmediatamente como base64
         const reader = new FileReader();
         reader.onload = (e) => {
+          console.log('✅ Preview cargado como base64, primeros 100 chars:', e.target.result.substring(0, 100));
           this.profileData.photo = e.target.result;
+          this.localPhotoBase64 = e.target.result; // ✅ GUARDAR AQUÍ
+          
+          this.$forceUpdate();
+          
+          console.log('🔄 Avatar debería actualizar ahora');
+        };
+        reader.onerror = (e) => {
+          console.error('❌ Error leyendo archivo:', e);
         };
         reader.readAsDataURL(file);
         
@@ -622,6 +624,7 @@ export default {
       }
     },
 
+    // ✅ MODIFICAR savePhotoOnly para mantener la imagen base64
     async savePhotoOnly() {
       if (!this.selectedFile) return;
       
@@ -629,7 +632,6 @@ export default {
         this.loading = true;
         
         const formData = new FormData();
-        // Cambiar para que use el mismo formato que el controlador espera
         formData.append('name', this.profileData.name || '');
         formData.append('idNumber', this.profileData.idNumber || '');
         formData.append('phone', this.profileData.phone || '');
@@ -640,53 +642,20 @@ export default {
         formData.append('postal_code', this.profileData.postal_code || '');
         formData.append('photo', this.selectedFile);
         
-        console.log('📤 Enviando foto con datos completos:', {
-          hasPhoto: !!this.selectedFile,
-          name: this.profileData.name,
-          formDataKeys: Array.from(formData.keys())
-        });
+        console.log('📤 Enviando foto al servidor');
 
         const response = await this.saveToServer(formData);
         
         console.log('✅ Respuesta del servidor (foto):', response.data);
         
-        // Actualizar datos locales con la respuesta del servidor
-        if (response.data.success) {
-          if (response.data.data && response.data.data.photo) {
-            this.profileData.photo = response.data.data.photo;
-          } else if (response.data.user && response.data.user.photo) {
-            this.profileData.photo = response.data.user.photo;
-          }
-        }
+        // Ya tenemos this.localPhotoBase64 guardado, no necesitamos hacer más
         
         this.selectedFile = null;
         this.showMessage('Foto actualizada correctamente', 'alert-success');
 
       } catch (error) {
         console.error('❌ Error saving photo:', error);
-        
-        if (error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Response status:', error.response.status);
-          
-          if (error.response.status === 422) {
-            const errors = error.response.data.errors || {};
-            console.error('Validation errors:', errors);
-            
-            // Mostrar el primer error de validación
-            const firstError = Object.values(errors)[0];
-            const errorMessage = Array.isArray(firstError) ? firstError[0] : 
-                                firstError || 'Error de validación en la foto';
-            this.showMessage(errorMessage, 'alert-danger');
-          } else {
-            this.showMessage('Error al guardar la foto', 'alert-danger');
-          }
-        } else {
-          this.showMessage('Error de conexión al guardar la foto', 'alert-danger');
-        }
-        
-        // Revertir cambio visual si falla
-        await this.fetchProfile();
+        this.showMessage('Error al guardar la foto', 'alert-danger');
       } finally {
         this.loading = false;
       }
@@ -1112,7 +1081,38 @@ export default {
           showConfirmButton: false
         });
       });
-    }
+    },
+
+    // ✅ AGREGAR ESTE MÉTODO NUEVO
+    generateSimpleAvatar() {
+      console.log('🎨 Generando avatar para:', this.profileData.name);
+      
+      // 1. Usar la foto base64 guardada localmente si existe
+      if (this.localPhotoBase64) {
+        console.log('✅ Usando foto base64 persistente');
+        return this.localPhotoBase64;
+      }
+      
+      // 2. Si hay una foto base64 nueva (recién subida), usarla
+      if (this.profileData.photo && this.profileData.photo.startsWith('data:image')) {
+        console.log('✅ Usando foto base64 recién subida');
+        return this.profileData.photo;
+      }
+      
+      // 3. Para todo lo demás, usar avatar con iniciales
+      const name = this.profileData.name || 'Usuario';
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      
+      console.log('👤 Generando avatar con iniciales:', initials);
+      
+      return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='100' fill='%230d6efd'/%3E%3Ctext x='100' y='115' text-anchor='middle' font-family='Arial,sans-serif' font-size='60' font-weight='bold' fill='white'%3E${initials}%3C/text%3E%3C/svg%3E`;
+    },
+
+    // ✅ AGREGAR este método para manejar errores
+    handleImageError(event) {
+      // No hacer nada aquí, el generateSimpleAvatar ya maneja todo
+      console.log('🔄 Imagen no encontrada, ya usando avatar con iniciales');
+    },
   }
 };
 </script>
@@ -1163,5 +1163,14 @@ export default {
 .position-relative .btn-primary:hover {
   transform: scale(1.1);
   transition: transform 0.2s ease;
+}
+
+/* Estilos para la foto de perfil */
+.profile-photo {
+  transition: transform 0.3s ease;
+}
+
+.profile-photo:hover {
+  transform: scale(1.05);
 }
 </style>

@@ -80,11 +80,6 @@
                       <span v-if="unreadNotifications > 0" class="badge bg-primary ms-2">{{ unreadNotifications }}</span>
                     </router-link>
                   </li>
-                  <li>
-                    <router-link to="/my-requests" class="dropdown-item">
-                      <i class="fas fa-clipboard-list me-2"></i> Mis Solicitudes
-                    </router-link>
-                  </li>
                   <li><hr class="dropdown-divider"></li>
                   <li>
                     <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
