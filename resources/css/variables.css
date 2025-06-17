@@ -1,0 +1,241 @@
+:root {
+  /* Colores Base Tecnológicos - Ligeramente refinados */
+  --tech-blue: #0B4F6C;
+  --circuit-green: #01A66F;
+  --digital-black: #212529;
+  --tech-gray: #F1F3F5;
+  
+  /* Acentos Tecnológicos - Mejorados para mayor contraste */
+  --signal-orange: #FF6B35;
+  --electric-cyan: #00B2CA;
+  
+  /* Estados del Sistema - Optimizados para legibilidad */
+  --system-green: #2DC653;
+  --error-red: #E63946;
+  --warning-yellow: #FFBA08;
+  
+  /* Bootstrap Overrides */
+  --bs-primary: var(--tech-blue);
+  --bs-success: var(--circuit-green);
+  --bs-danger: var(--error-red);
+  --bs-warning: var(--warning-yellow);
+  --bs-info: var(--electric-cyan);
+  --bs-secondary: #6c757d;
+  --bs-light: var(--tech-gray);
+  --bs-dark: var(--digital-black);
+  
+  /* Colores específicos de roles */
+  --client-primary: var(--tech-blue);
+  --client-secondary: var(--electric-cyan);
+  --client-accent: var(--signal-orange);
+  
+  --tech-primary: var(--circuit-green);
+  --tech-secondary: var(--tech-blue);
+  --tech-accent: var(--electric-cyan);
+  
+  /* Variables de diseño */
+  --border-radius: 6px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --transition: all 0.3s ease;
+  --gradient-primary: linear-gradient(135deg, var(--tech-blue) 0%, #083d56 100%);
+  --gradient-success: linear-gradient(135deg, var(--circuit-green) 0%, #018d5a 100%);
+  --gradient-accent: linear-gradient(135deg, var(--signal-orange) 0%, #e45a29 100%);
+}
+
+/* Verificar que estas variables estén correctamente definidas */
+
+:root {
+  /* Colores Base Tecnológicos */
+  --tech-blue: #0B4F6C;
+  --circuit-green: #01A66F;
+  --digital-black: #212529;
+  --tech-gray: #F1F3F5;
+  
+  /* Acentos Tecnológicos */
+  --signal-orange: #FF6B35;
+  --electric-cyan: #00B2CA;
+  
+  /* Gradientes */
+  --gradient-primary: linear-gradient(135deg, var(--tech-blue) 0%, #083d56 100%);
+  --gradient-success: linear-gradient(135deg, var(--circuit-green) 0%, #018d5a 100%);
+  --gradient-accent: linear-gradient(135deg, var(--signal-orange) 0%, #e45a29 100%);
+}
+
+/* Estilo para modo técnico */
+body.technician-mode {
+  --bs-primary: var(--circuit-green);
+}
+
+/* Componentes Bootstrap Overrides */
+.btn-primary {
+  background-color: var(--tech-blue);
+  border-color: var(--tech-blue);
+  transition: var(--transition);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #0a3d58;
+  border-color: #0a3d58;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-success {
+  background-color: var(--circuit-green);
+  border-color: var(--circuit-green);
+  transition: var(--transition);
+}
+
+.btn-success:hover,
+.btn-success:focus {
+  background-color: #01955f;
+  border-color: #01955f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Botón accent naranja para CTA */
+.btn-accent {
+  background-color: var(--signal-orange);
+  border-color: var(--signal-orange);
+  color: white;
+  transition: var(--transition);
+}
+
+.btn-accent:hover,
+.btn-accent:focus {
+  background-color: #e5602f;
+  border-color: #e5602f;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Botones outline */
+.btn-outline-primary {
+  color: var(--tech-blue);
+  border-color: var(--tech-blue);
+  transition: var(--transition);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--tech-blue);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-outline-success {
+  color: var(--circuit-green);
+  border-color: var(--circuit-green);
+  transition: var(--transition);
+}
+
+.btn-outline-success:hover {
+  background-color: var(--circuit-green);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Fondos de gradiente */
+.bg-primary {
+  background: var(--gradient-primary) !important;
+}
+
+.bg-success {
+  background: var(--gradient-success) !important;
+}
+
+.bg-accent {
+  background: var(--gradient-accent) !important;
+}
+
+/* Tarjetas mejoradas */
+.card {
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-primary {
+  border-top: 4px solid var(--tech-blue);
+}
+
+.card-success {
+  border-top: 4px solid var(--circuit-green);
+}
+
+.card-accent {
+  border-top: 4px solid var(--signal-orange);
+}
+
+/* Text colors */
+.text-tech-blue {
+  color: var(--tech-blue) !important;
+}
+
+.text-circuit-green {
+  color: var(--circuit-green) !important;
+}
+
+.text-signal-orange {
+  color: var(--signal-orange) !important;
+}
+
+.text-electric-cyan {
+  color: var(--electric-cyan) !important;
+}
+
+/* Badges */
+.badge.bg-tech {
+  background-color: var(--tech-blue) !important;
+}
+
+.badge.bg-circuit {
+  background-color: var(--circuit-green) !important;
+}
+
+.badge.bg-signal {
+  background-color: var(--signal-orange) !important;
+}
+
+/* Notificaciones */
+.notification-badge {
+  background-color: var(--signal-orange);
+  color: white;
+}
+
+/* Iconos tecnológicos */
+.tech-icon {
+  color: var(--electric-cyan);
+}
+
+.circuit-icon {
+  color: var(--circuit-green);
+}
+
+.signal-icon {
+  color: var(--signal-orange);
+}
+
+/* Añadir estas líneas después de la declaración :root {...} existente */
+
+/* Variables de compatibilidad para código existente */
+:root {
+  /* Mapeo de nombres antiguos a nuevos */
+  --blue-tech: var(--tech-blue);
+  --green-service: var(--circuit-green);
+  --orange-accent: var(--signal-orange);
+  --turquoise-accent: var(--electric-cyan);
+  --warning: var(--warning-yellow);
+  
+  /* Fonts y otros valores para consistencia */
+  --font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  --gray-light: var(--tech-gray);
+  --danger: var(--error-red);
+}

@@ -109,7 +109,7 @@
           <router-link 
             v-if="isLoggedIn" 
             to="/solicitar-servicio" 
-            class="btn btn-primary btn-lg px-4 py-2 fw-bold shadow"
+            class="btn btn-accent btn-lg px-4 py-2 fw-bold shadow-sm"
           >
             <i class="fas fa-clipboard-check me-2"></i>
             Solicitar Servicio Ahora
@@ -117,11 +117,11 @@
           
           <router-link 
             v-else 
-            to="/login" 
-            class="btn btn-primary btn-lg px-4 py-2 fw-bold shadow"
+            to="/register" 
+            class="btn btn-accent btn-lg px-4 py-2 fw-bold shadow-sm"
           >
-            <i class="fas fa-sign-in-alt me-2"></i>
-            Inicia Sesión para Solicitar un Servicio
+            <i class="fas fa-user-plus me-2"></i>
+            Crear Cuenta Gratis
           </router-link>
         </div>
 
@@ -450,6 +450,348 @@
           </div>
         </div>
       </div>
+
+      <!-- ✅ NUEVA SECCIÓN: PARA CLIENTES Y TÉCNICOS -->
+      <div class="py-5 bg-light mt-5">
+        <div class="container">
+          <h2 class="text-center mb-5 fw-bold text-primary">
+            <i class="fas fa-users me-2"></i> Una plataforma, dos perfiles
+          </h2>
+          
+          <div class="row g-4">
+            <!-- PARA CLIENTES -->
+            <div class="col-md-6">
+              <div class="card h-100 border-primary border-2 shadow-sm overflow-hidden">
+                <div class="bg-primary text-white p-4 text-center">
+                  <i class="fas fa-user-tie mb-2" style="font-size: 2.5rem;"></i>
+                  <h3 class="h4 fw-bold">Para Clientes</h3>
+                </div>
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Encuentra técnicos certificados</h4>
+                      <p class="text-muted mb-0">Accede a profesionales con experiencia verificada</p>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Solicita servicios a domicilio</h4>
+                      <p class="text-muted mb-0">Sin moverte de casa, en el horario que prefieras</p>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Seguimiento en tiempo real</h4>
+                      <p class="text-muted mb-0">Conoce el estado de tu solicitud en todo momento</p>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Califica el servicio</h4>
+                      <p class="text-muted mb-0">Tu opinión ayuda a mantener la calidad del servicio</p>
+                    </div>
+                  </div>
+                  
+                  <div class="text-center mt-4">
+                    <router-link 
+                      v-if="!isLoggedIn" 
+                      to="/register" 
+                      class="btn btn-primary px-4 py-2 fw-bold"
+                    >
+                      <i class="fas fa-user-plus me-2"></i>Registrarme como Cliente
+                    </router-link>
+                    <router-link 
+                      v-else 
+                      to="/solicitar-servicio" 
+                      class="btn btn-primary px-4 py-2 fw-bold"
+                    >
+                      <i class="fas fa-clipboard-check me-2"></i>Solicitar Servicio
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- PARA TÉCNICOS -->
+            <div class="col-md-6">
+              <div class="card h-100 border-success border-2 shadow-sm overflow-hidden">
+                <div class="bg-success text-white p-4 text-center">
+                  <i class="fas fa-user-cog mb-2" style="font-size: 2.5rem;"></i>
+                  <h3 class="h4 fw-bold">Para Técnicos</h3>
+                </div>
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Consigue nuevos clientes</h4>
+                      <p class="text-muted mb-0">Amplía tu cartera de clientes sin esfuerzo de ventas</p>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Gestiona tus servicios</h4>
+                      <p class="text-muted mb-0">Organiza tu agenda y administra tus trabajos</p>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Construye tu reputación</h4>
+                      <p class="text-muted mb-0">Recibe calificaciones y comentarios para destacarte</p>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <i class="fas fa-check-circle text-success fs-5"></i>
+                    </div>
+                    <div class="ms-3">
+                      <h4 class="h6 fw-bold mb-1">Aumenta tus ingresos</h4>
+                      <p class="text-muted mb-0">Recibe pagos seguros por cada servicio completado</p>
+                    </div>
+                  </div>
+                  
+                  <div class="text-center mt-4">
+                    <router-link 
+                      v-if="!isLoggedIn" 
+                      to="/register-tech" 
+                      class="btn btn-success px-4 py-2 fw-bold"
+                    >
+                      <i class="fas fa-user-plus me-2"></i>Registrarme como Técnico
+                    </router-link>
+                    <router-link 
+                      v-else-if="userType === 'technician'" 
+                      to="/solicitudes-disponibles" 
+                      class="btn btn-success px-4 py-2 fw-bold"
+                    >
+                      <i class="fas fa-tools me-2"></i>Ver Solicitudes
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ NUEVA SECCIÓN: ESTADÍSTICAS PARA MOTIVAR REGISTRO -->
+      <div class="py-5 bg-white">
+        <div class="container">
+          <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+              <h2 class="fw-bold text-primary mb-4">Únete a la comunidad de CONECTAPRO</h2>
+              <p class="lead">Miles de clientes y técnicos ya están aprovechando nuestra plataforma para resolver sus necesidades informáticas.</p>
+              
+              <div class="d-flex flex-column gap-3 mt-4">
+                <div class="d-flex align-items-center">
+                  <div class="icon-box bg-primary text-white rounded p-2 me-3">
+                    <i class="fas fa-shield-alt"></i>
+                  </div>
+                  <div>
+                    <h4 class="h6 fw-bold mb-1">100% Seguro</h4>
+                    <p class="text-muted mb-0">Tus datos personales están protegidos</p>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                  <div class="icon-box bg-primary text-white rounded p-2 me-3">
+                    <i class="fas fa-bolt"></i>
+                  </div>
+                  <div>
+                    <h4 class="h6 fw-bold mb-1">Respuesta rápida</h4>
+                    <p class="text-muted mb-0">Atención en menos de 24 horas</p>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                  <div class="icon-box bg-primary text-white rounded p-2 me-3">
+                    <i class="fas fa-star"></i>
+                  </div>
+                  <div>
+                    <h4 class="h6 fw-bold mb-1">Servicio garantizado</h4>
+                    <p class="text-muted mb-0">Satisfacción o te devolvemos tu dinero</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="mt-4">
+                <router-link 
+                  v-if="!isLoggedIn" 
+                  to="/register" 
+                  class="btn btn-primary btn-lg px-4 fw-bold me-2"
+                >
+                  <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                </router-link>
+                <a href="#servicios" class="btn btn-outline-primary btn-lg px-4">Ver Servicios</a>
+              </div>
+            </div>
+            
+            <div class="col-lg-6">
+              <div class="row g-3 text-center">
+                <div class="col-6">
+                  <div class="card border-0 bg-light p-4">
+                    <h3 class="display-4 fw-bold text-primary mb-0">2500+</h3>
+                    <p class="text-muted mt-2">Clientes satisfechos</p>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card border-0 bg-light p-4">
+                    <h3 class="display-4 fw-bold text-success mb-0">150+</h3>
+                    <p class="text-muted mt-2">Técnicos certificados</p>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card border-0 bg-light p-4">
+                    <h3 class="display-4 fw-bold text-info mb-0">5000+</h3>
+                    <p class="text-muted mt-2">Servicios completados</p>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="card border-0 bg-light p-4">
+                    <h3 class="display-4 fw-bold text-warning mb-0">4.8</h3>
+                    <p class="text-muted mt-2">Valoración promedio</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ NUEVA SECCIÓN: TESTIMONIOS -->
+      <div class="py-5 bg-light">
+        <div class="container">
+          <h2 class="text-center mb-5 fw-bold text-primary">Lo que dicen nuestros usuarios</h2>
+          
+          <div class="row g-4">
+            <!-- Testimonio Cliente -->
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <div class="text-warning">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                    </div>
+                  </div>
+                  <p class="card-text text-muted mb-4">
+                    "Mi computadora estaba muy lenta y necesitaba una solución urgente. 
+                    En menos de 24 horas, un técnico vino a mi casa y resolvió todos los problemas. 
+                    ¡Ahora funciona como nueva!"
+                  </p>
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                      <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" 
+                           style="width: 50px; height: 50px;">
+                        <span class="fw-bold">MC</span>
+                      </div>
+                    </div>
+                    <div class="ms-3">
+                      <h5 class="mb-0">María Castro</h5>
+                      <p class="text-muted small mb-0">Cliente desde 2024</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Testimonio Cliente -->
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <div class="text-warning">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star-half-alt"></i>
+                    </div>
+                  </div>
+                  <p class="card-text text-muted mb-4">
+                    "Necesitaba configurar una red para mi pequeña empresa. 
+                    El técnico fue muy profesional y me explicó todo el proceso. 
+                    Ahora tenemos una conexión estable y segura."
+                  </p>
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                      <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" 
+                           style="width: 50px; height: 50px;">
+                        <span class="fw-bold">JR</span>
+                      </div>
+                    </div>
+                    <div class="ms-3">
+                      <h5 class="mb-0">Juan Ramírez</h5>
+                      <p class="text-muted small mb-0">Cliente desde 2023</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Testimonio Técnico -->
+            <div class="col-md-4">
+              <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                  <div class="d-flex mb-3">
+                    <div class="text-warning">
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                      <i class="fas fa-star"></i>
+                    </div>
+                  </div>
+                  <p class="card-text text-muted mb-4">
+                    "Como técnico independiente, CONECTAPRO me ha ayudado a encontrar 
+                    nuevos clientes sin tener que invertir en publicidad. La plataforma 
+                    es muy intuitiva y los pagos son puntuales."
+                  </p>
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                      <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white" 
+                           style="width: 50px; height: 50px;">
+                        <span class="fw-bold">AT</span>
+                      </div>
+                    </div>
+                    <div class="ms-3">
+                      <h5 class="mb-0">Alex Torres</h5>
+                      <p class="text-muted small mb-0">Técnico desde 2023</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Pie de página -->
@@ -664,14 +1006,58 @@ export default {
 .circle-icon {
   width: 80px;
   height: 80px;
-  background-color: #e7f1ff;
+  background-color: rgba(0, 86, 179, 0.1); /* Versión semitransparente de --blue-tech */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
   font-size: 2rem;
-  color: #0d6efd;
+  color: var(--blue-tech);
+}
+
+/* Gradiente para fondo de columna izquierda */
+.bg-primary {
+  background: linear-gradient(135deg, var(--blue-tech) 0%, var(--turquoise-accent) 100%) !important;
+}
+
+/* Tarjetas para Cliente/Técnico */
+.border-primary.border-2 {
+  border-top: 5px solid var(--blue-tech) !important;
+}
+
+.border-success.border-2 {
+  border-top: 5px solid var(--green-service) !important;
+}
+
+/* CTA naranja destacado */
+.btn-highlight {
+  background-color: var(--orange-accent);
+  border-color: var(--orange-accent);
+  color: white;
+}
+
+.btn-highlight:hover {
+  background-color: #e86c2a;
+  border-color: #e86c2a;
+  color: white;
+}
+
+/* Cards para estadísticas */
+.card:hover .text-primary {
+  color: var(--blue-tech) !important;
+}
+
+.card:hover .text-success {
+  color: var(--green-service) !important;
+}
+
+.card:hover .text-info {
+  color: var(--turquoise-accent) !important;
+}
+
+.card:hover .text-warning {
+  color: var(--warning) !important;
 }
 
 /* Estilos para tarjetas de servicios */

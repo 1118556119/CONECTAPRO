@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row min-vh-100">
       <!-- Panel izquierdo decorativo - solo visible en pantallas md y superiores -->
-      <div class="col-lg-5 d-none d-lg-flex bg-primary position-relative overflow-hidden">
+      <div class="col-lg-5 d-none d-lg-flex register-gradient position-relative overflow-hidden">
         <!-- Decoración de fondo -->
         <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
           <div class="position-absolute top-50 start-50 translate-middle">
@@ -51,9 +51,9 @@
           </router-link>
         </div>
 
-        <div class="card border-0 shadow-lg p-4" style="max-width: 600px; width: 100%;">
+        <div class="card border-0 shadow-lg p-4 register-card" style="max-width: 600px; width: 100%;">
           <div class="card-body p-3 p-md-4">
-            <h2 class="text-center text-primary mb-4 fw-bold">
+            <h2 class="text-center text-primary mb-4 fw-bold register-title">
               <i class="fas fa-user-plus me-2"></i> Crear nueva cuenta
             </h2>
 
@@ -68,7 +68,7 @@
             <form @submit.prevent="register" class="needs-validation">
               <div class="row g-3 mb-3">
                 <!-- Datos personales -->
-                <h5 class="col-12 fw-bold text-primary mb-0 border-bottom pb-2">
+                <h5 class="col-12 fw-bold text-primary mb-0 border-bottom pb-2 form-section-title">
                   <i class="fas fa-user me-2"></i> Datos personales
                 </h5>
 
@@ -232,7 +232,7 @@
 
               <!-- Botón de registro -->
               <div class="d-grid gap-2 mb-3">
-                <button type="submit" class="btn btn-primary btn-lg" :disabled="!isValidForm || isLoading">
+                <button type="submit" class="btn btn-primary btn-lg btn-register" :disabled="!isValidForm || isLoading">
                   <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"
                     aria-hidden="true"></span>
                   <i v-else class="fas fa-user-plus me-2"></i>
@@ -575,9 +575,11 @@ export default {
 </script>
 
 <style scoped>
-/* Estilo para el fondo de la columna izquierda */
-.bg-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%) !important;
+
+/* Añadir este selector específico */
+.register-gradient {
+  background: var(--gradient-primary) !important;
+  color: white;
 }
 
 /* Mejorar espaciado y diseño responsivo */
@@ -619,5 +621,153 @@ select {
     border-radius: 0;
     box-shadow: none !important;
   }
+}
+
+/* Mejorar contraste de texto en inputs */
+.form-control:focus {
+  border-color: var(--blue-tech);
+  box-shadow: 0 0 0 0.25rem rgba(0, 86, 179, 0.25);
+}
+
+/* Botones de inicio de sesión más modernos */
+.btn-primary {
+  background-color: var(--blue-tech);
+  border-color: var(--blue-tech);
+}
+
+.btn-primary:hover {
+  background-color: #00448f;
+  border-color: #00448f;
+}
+
+/* Botón de registro (verde) */
+.btn-success {
+  background-color: var(--green-service);
+  border-color: var(--green-service);
+}
+
+.btn-success:hover {
+  background-color: #1f8f3a;
+  border-color: #1f8f3a;
+}
+
+/* Botón alternativo naranja */
+.btn-orange {
+  background-color: var(--orange-accent);
+  border-color: var(--orange-accent);
+  color: white;
+}
+
+.btn-orange:hover {
+  background-color: #e86c2a;
+  border-color: #e86c2a;
+  color: white;
+}
+
+/* Estilos adicionales para el registro */
+.register-container {
+  background-color: var(--tech-gray);
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.register-card {
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.register-header {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.register-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.register-subtitle {
+  opacity: 0.9;
+}
+
+.register-form {
+  padding: 2rem;
+}
+
+.form-section-title {
+  color: var(--tech-blue);
+  font-weight: 600;
+  border-bottom: 1px solid var(--tech-gray);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.register-type-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.register-type-card {
+  flex: 1;
+  border: 2px solid #e9ecef;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.register-type-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.register-type-card.client {
+  border-color: var(--tech-blue);
+}
+
+.register-type-card.technician {
+  border-color: var(--circuit-green);
+}
+
+.register-type-card.selected {
+  background-color: rgba(11, 79, 108, 0.05);
+}
+
+.register-type-card.selected.technician {
+  background-color: rgba(1, 166, 111, 0.05);
+}
+
+.register-type-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.register-type-icon.client {
+  color: var(--tech-blue);
+}
+
+.register-type-icon.technician {
+  color: var(--circuit-green);
+}
+
+.form-floating>.form-control:focus~label {
+  color: var(--tech-blue);
+}
+
+.form-floating>.form-control:focus {
+  border-color: var(--tech-blue);
+  box-shadow: 0 0 0 0.25rem rgba(11, 79, 108, 0.25);
+}
+
+.btn-register {
+  width: 100%;
+  padding: 0.75rem 0;
+  font-weight: 600;
 }
 </style>

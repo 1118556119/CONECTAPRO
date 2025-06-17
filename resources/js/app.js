@@ -5,10 +5,11 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import App from './App.vue'; 
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap'; 
+// Importar CSS (verificar orden)
+import '../css/variables.css';  // PRIMERO variables CSS
+import '../css/app.css';        // LUEGO app CSS
+import 'bootstrap/dist/css/bootstrap.min.css'; // DESPUÉS Bootstrap
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 // Configurar axios
@@ -46,3 +47,33 @@ app.config.globalProperties.$swal = Swal;
 
 app.use(router);
 app.mount('#app');
+
+// Configuración de tema según tipo de usuario (versión unificada)
+document.addEventListener('DOMContentLoaded', () => {
+  // Obtener tipo de usuario del localStorage
+  const userType = localStorage.getItem('user_type');
+  
+  // Aplicar clase al body según el tipo de usuario
+  if (userType === 'technician') {
+    document.body.classList.add('technician-mode');
+    document.body.classList.add('user-technician');
+    
+    // Cambia el color del theme-color meta tag
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', '#01A66F');
+    }
+  } else if (userType === 'client') {
+    document.body.classList.add('user-client');
+  }
+  
+  // Animación sutil de carga
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    appElement.style.opacity = '0';
+    setTimeout(() => {
+      appElement.style.transition = 'opacity 0.5s ease';
+      appElement.style.opacity = '1';
+    }, 100);
+  }
+});

@@ -92,7 +92,8 @@
               <button @click="showNotifications" class="btn btn-outline-primary btn-sm position-relative">
                 <i class="fas fa-bell"></i>
                 <span v-if="unreadNotifications > 0" 
-                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style="font-size: 0.65rem; padding: 0.25rem 0.4rem;">
                   {{ unreadNotifications }}
                 </span>
               </button>
@@ -346,7 +347,15 @@ export default {
     }
   },
 
+  // ✅ MODIFICAR el método mounted para cargar la foto desde localStorage
   async mounted() {
+    // ✅ CARGAR FOTO DESDE LOCALSTORAGE - NUEVO
+    const savedPhoto = localStorage.getItem('userPhoto');
+    if (savedPhoto) {
+      this.localPhotoBase64 = savedPhoto;
+      console.log('📸 Foto recuperada desde localStorage');
+    }
+    
     await this.fetchProfile();
     await this.fetchNotifications();
     
@@ -583,7 +592,7 @@ export default {
       this.selectedFile = null;
     },
 
-    // ✅ MODIFICAR el método onFileChange para guardar la foto base64
+    // ✅ MODIFICAR el método onFileChange para guardar la foto en localStorage
     onFileChange(event) {
       const file = event.target.files[0];
       if (file) {
@@ -604,16 +613,15 @@ export default {
         // Mostrar preview inmediatamente como base64
         const reader = new FileReader();
         reader.onload = (e) => {
-          console.log('✅ Preview cargado como base64, primeros 100 chars:', e.target.result.substring(0, 100));
+          console.log('✅ Preview cargado como base64');
           this.profileData.photo = e.target.result;
-          this.localPhotoBase64 = e.target.result; // ✅ GUARDAR AQUÍ
+          this.localPhotoBase64 = e.target.result;
+          
+          // ✅ GUARDAR EN LOCALSTORAGE - NUEVO
+          localStorage.setItem('userPhoto', e.target.result);
           
           this.$forceUpdate();
-          
-          console.log('🔄 Avatar debería actualizar ahora');
-        };
-        reader.onerror = (e) => {
-          console.error('❌ Error leyendo archivo:', e);
+          console.log('🔄 Avatar actualizado y guardado en localStorage');
         };
         reader.readAsDataURL(file);
         
@@ -885,11 +893,23 @@ export default {
         });
         
         if (response.data.success) {
-          this.notifications = response.data.notifications || [];
-          this.unreadNotifications = this.notifications.filter(n => !n.read).length;
+          // Obtener notificaciones del servidor
+          let notifs = response.data.data || [];
+          
+          // ✅ OBTENER IDs DE NOTIFICACIONES YA LEÍDAS
+          const readIds = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+          
+          // ✅ FILTRAR PARA ELIMINAR LAS YA LEÍDAS
+          this.notifications = notifs.filter(notification => !readIds.includes(notification.id));
+          
+          // Actualizar contador
+          this.unreadNotifications = this.notifications.length;
+          
+          console.log(`✅ Mostrando ${this.notifications.length} notificaciones no leídas`);
         }
       } catch (error) {
         console.error('Error fetching notifications:', error);
+        
         // Datos de ejemplo para desarrollo
         this.notifications = [
           {
@@ -898,22 +918,55 @@ export default {
             message: 'Se te ha asignado un nuevo servicio de mantenimiento correctivo',
             read: false,
             created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            title: 'Servicio completado',
-            message: 'El servicio #12345 ha sido marcado como completado',
-            read: true,
-            created_at: new Date(Date.now() - 86400000).toISOString()
           }
         ];
-        this.unreadNotifications = this.notifications.filter(n => !n.read).length;
+        
+        // ✅ OBTENER IDs DE NOTIFICACIONES YA LEÍDAS
+        const readIds = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+        
+        // ✅ FILTRAR PARA ELIMINAR LAS YA LEÍDAS
+        this.notifications = this.notifications.filter(n => !readIds.includes(n.id));
+        
+        this.unreadNotifications = this.notifications.length;
+      }
+      
+      // Asegurarnos de tener al menos una notificación para pruebas solo si no hay ninguna
+      if (this.notifications.length === 0 && !localStorage.getItem('readNotifications')) {
+        this.notifications = [
+          {
+            id: 1,
+            title: 'Bienvenido a CONECTAPRO',
+            message: '¡Gracias por registrarte! Estamos aquí para ayudarte con tus servicios técnicos.',
+            read: false,
+            created_at: new Date().toISOString()
+          }
+        ];
+        this.unreadNotifications = 1;
       }
     },
 
+    // ✅ REEMPLAZAR showNotifications() para forzar actualización del UI
     showNotifications() {
+      console.log('📣 Mostrando modal de notificaciones');
       this.showNotificationsModal = true;
       document.body.style.overflow = 'hidden';
+      
+      // Forzar actualización de la UI
+      this.$nextTick(() => {
+        // Si no hay notificaciones, agregamos una de prueba
+        if (this.notifications.length === 0) {
+          this.notifications = [
+            {
+              id: Date.now(),
+              title: 'Bienvenido a CONECTAPRO',
+              message: '¡Gracias por registrarte! Explora todas las funcionalidades disponibles.',
+              read: false,
+              created_at: new Date().toISOString()
+            }
+          ];
+          this.unreadNotifications = 1;
+        }
+      });
     },
 
     closeNotifications() {
@@ -921,6 +974,7 @@ export default {
       document.body.style.overflow = '';
     },
 
+    // ✅ MODIFICAR markAllAsRead para eliminar notificaciones leídas
     async markAllAsRead() {
       try {
         const token = localStorage.getItem('token');
@@ -928,18 +982,58 @@ export default {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        this.notifications.forEach(notification => {
-          notification.read = true;
-        });
+        // ✅ GUARDAR IDs ANTES DE ELIMINAR
+        const readIds = this.notifications.map(n => n.id);
+        localStorage.setItem('readNotifications', JSON.stringify(readIds));
+        
+        // ✅ ELIMINAR NOTIFICACIONES EN VEZ DE MARCARLAS
+        this.notifications = [];
         this.unreadNotifications = 0;
+        
+        console.log('✅ Notificaciones eliminadas después de marcar como leídas');
         
       } catch (error) {
         console.error('Error marking notifications as read:', error);
-        // Marcar localmente si falla el servidor
-        this.notifications.forEach(notification => {
-          notification.read = true;
-        });
+        
+        // Si falla el servidor, eliminar localmente
+        const readIds = this.notifications.map(n => n.id);
+        localStorage.setItem('readNotifications', JSON.stringify(readIds));
+        
+        this.notifications = [];
         this.unreadNotifications = 0;
+      }
+    },
+
+    // ✅ MODIFICAR markAsRead para eliminar notificación individual
+    markAsRead(notificationId) {
+      try {
+        const token = localStorage.getItem('token');
+        axios.post(`/notifications/${notificationId}/read`, {}, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        // ✅ GUARDAR ID EN LOCALSTORAGE
+        const readIds = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+        readIds.push(notificationId);
+        localStorage.setItem('readNotifications', JSON.stringify(readIds));
+        
+        // ✅ ELIMINAR LA NOTIFICACIÓN DEL ARRAY
+        this.notifications = this.notifications.filter(n => n.id !== notificationId);
+        
+        // Actualizar contador
+        this.unreadNotifications = this.notifications.length;
+        
+      } catch (error) {
+        console.error(`Error marking notification ${notificationId} as read:`, error);
+        
+        // Eliminar localmente si falla
+        this.notifications = this.notifications.filter(n => n.id !== notificationId);
+        this.unreadNotifications = this.notifications.length;
+        
+        // Guardar en localStorage
+        const readIds = JSON.parse(localStorage.getItem('readNotifications') || '[]');
+        readIds.push(notificationId);
+        localStorage.setItem('readNotifications', JSON.stringify(readIds));
       }
     },
 
@@ -994,6 +1088,7 @@ export default {
       this.messageClass = 'alert-info';
     },
 
+    // ✅ MODIFICAR logout para limpiar los datos almacenados
     async logout() {
       const result = await Swal.fire({
         title: '¿Cerrar sesión?',
@@ -1016,8 +1111,12 @@ export default {
         } catch (error) {
           console.error('Error during logout:', error);
         } finally {
+          // ✅ LIMPIAR TAMBIÉN LOS DATOS DE FOTO Y NOTIFICACIONES - NUEVO
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          localStorage.removeItem('userPhoto');
+          localStorage.removeItem('readNotifications');
+          
           this.$router.push('/login');
         }
       }
@@ -1105,7 +1204,12 @@ export default {
       
       console.log('👤 Generando avatar con iniciales:', initials);
       
-      return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='100' fill='%230d6efd'/%3E%3Ctext x='100' y='115' text-anchor='middle' font-family='Arial,sans-serif' font-size='60' font-weight='bold' fill='white'%3E${initials}%3C/text%3E%3C/svg%3E`;
+      // Determinar color basado en tipo de usuario
+      const bgColor = this.profileData.user_type === 'technician' ? 
+                     '%2328A745' : // Verde para técnicos (URL encoded #28A745)
+                     '%230056B3'; // Azul para clientes (URL encoded #0056B3)
+      
+      return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='100' fill='${bgColor}'/%3E%3Ctext x='100' y='115' text-anchor='middle' font-family='Arial,sans-serif' font-size='60' font-weight='bold' fill='white'%3E${initials}%3C/text%3E%3C/svg%3E`;
     },
 
     // ✅ AGREGAR este método para manejar errores
@@ -1172,5 +1276,53 @@ export default {
 
 .profile-photo:hover {
   transform: scale(1.05);
+}
+
+/* Añadir al <style> de Profile.vue y ServiceRequestForm.vue */
+
+/* Menú lateral activo según rol */
+.user-client .list-group-item.active {
+  background-color: var(--blue-tech);
+  border-color: var(--blue-tech);
+}
+
+.user-technician .list-group-item.active {
+  background-color: var(--green-service);
+  border-color: var(--green-service);
+}
+
+/* Avatar con iniciales personalizado */
+.user-client .avatar-initials {
+  background-color: var(--blue-tech);
+}
+
+.user-technician .avatar-initials {
+  background-color: var(--green-service);
+}
+
+/* Notificaciones */
+.badge.bg-danger {
+  background-color: var(--danger) !important;
+}
+
+/* Iconos de secciones */
+.section-icon {
+  color: var(--blue-tech);
+}
+
+.user-technician .section-icon {
+  color: var(--green-service);
+}
+
+/* Formularios */
+.form-section-title {
+  color: var(--blue-tech);
+  border-bottom: 2px solid var(--gray-light);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.user-technician .form-section-title {
+  color: var(--green-service);
 }
 </style>

@@ -846,3 +846,120 @@ export default {
 };
 </script>
 
+<style>
+/* Menú lateral activo según rol */
+.user-client .list-group-item.active {
+  background-color: var(--blue-tech);
+  border-color: var(--blue-tech);
+}
+
+.user-technician .list-group-item.active {
+  background-color: var(--green-service);
+  border-color: var(--green-service);
+}
+
+/* Avatar con iniciales personalizado */
+.user-client .avatar-initials {
+  background-color: var(--blue-tech);
+}
+
+.user-technician .avatar-initials {
+  background-color: var(--green-service);
+}
+
+/* Notificaciones */
+.badge.bg-danger {
+  background-color: var(--danger) !important;
+}
+
+/* Iconos de secciones */
+.section-icon {
+  color: var(--blue-tech);
+}
+
+.user-technician .section-icon {
+  color: var(--green-service);
+}
+
+/* Formularios */
+.form-section-title {
+  color: var(--blue-tech);
+  border-bottom: 2px solid var(--gray-light);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.user-technician .form-section-title {
+  color: var(--green-service);
+}
+
+/* Estilos adicionales para el formulario de servicio */
+.service-form-container {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+}
+
+.service-type-card {
+  border: 2px solid #e9ecef;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.service-type-card:hover {
+  border-color: var(--tech-blue);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.service-type-card.selected {
+  border-color: var(--tech-blue);
+  background-color: rgba(11, 79, 108, 0.05);
+}
+
+.service-icon {
+  color: var(--tech-blue);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--tech-gray);
+  padding-bottom: 1rem;
+}
+
+.form-section-title {
+  color: var(--tech-blue);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.form-control:focus {
+  border-color: var(--tech-blue);
+  box-shadow: 0 0 0 0.25rem rgba(11, 79, 108, 0.25);
+}
+
+/* Versión para técnicos */
+.user-technician .service-type-card.selected {
+  border-color: var(--circuit-green);
+  background-color: rgba(1, 166, 111, 0.05);
+}
+
+.user-technician .service-icon {
+  color: var(--circuit-green);
+}
+
+.user-technician .form-section-title {
+  color: var(--circuit-green);
+}
+
+.user-technician .form-control:focus {
+  border-color: var(--circuit-green);
+  box-shadow: 0 0 0 0.25rem rgba(1, 166, 111, 0.25);
+}
+</style>
+

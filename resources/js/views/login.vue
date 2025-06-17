@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <div class="row vh-100">
       <!-- Columna izquierda decorativa - visible solo en pantallas md y superiores -->
-      <div class="col-md-6 d-none d-md-flex bg-primary align-items-center justify-content-center text-white">
+      <div class="col-md-6 d-none d-md-flex login-gradient align-items-center justify-content-center text-white">
         <div class="text-center px-4">
           <i class="fas fa-tools fa-4x mb-4"></i>
           <h1 class="display-4 fw-bold mb-4">CONECTAPRO</h1>
@@ -298,9 +298,10 @@ export default {
   padding-left: 1rem;
 }
 
-/* Gradiente para fondo de columna izquierda */
-.bg-primary {
-  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%) !important;
+/* Añadir este selector específico que no sobrescribe el global */
+.login-gradient {
+  background: var(--gradient-primary) !important;
+  color: white;
 }
 
 /* Transiciones suaves */
@@ -313,5 +314,69 @@ export default {
   background-color: #f8f9fa;
   color: #0d6efd;
   border-color: #dee2e6;
+}
+
+/* Estilos adicionales para el login */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background-color: var(--tech-gray);
+}
+
+.login-box {
+  background: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.login-sidebar {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-title {
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.login-subtitle {
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.login-feature {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.login-feature-icon {
+  background-color: rgba(255, 255, 255, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+}
+
+.login-form {
+  padding: 2rem;
+}
+
+.form-floating>.form-control:focus~label {
+  color: var(--tech-blue);
+}
+
+.form-floating>.form-control:focus {
+  border-color: var(--tech-blue);
+  box-shadow: 0 0 0 0.25rem rgba(11, 79, 108, 0.25);
 }
 </style>
