@@ -215,4 +215,12 @@ class User extends Authenticatable implements MustVerifyEmail // ← IMPLEMENTAR
                         $q->where('is_available', true);
                     });
     }
+
+    /**
+     * Obtener las notificaciones del usuario.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(\App\Models\Notification::class);
+    }
 }

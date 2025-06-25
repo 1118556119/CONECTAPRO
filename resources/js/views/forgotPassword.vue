@@ -1,13 +1,13 @@
 <template>
     <div class="container d-flex justify-content-center align-items-center vh-100">
-      <!-- Botón para volver a la página principal -->
-      <div class="position-absolute top-0 start-0 m-3">
-        <router-link to="/" class="text-decoration-none text-primary d-flex align-items-center gap-2">
-          <i class="fas fa-arrow-left"></i> Volver a la página principal
-        </router-link>
-      </div>
+      
   
-      <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+      <div class="card shadow-lg p-4" style="max-width: 600px; width: 100%;">
+        <div class="text-center mb-4">
+        <router-link class="navbar-brand" to="/">
+        <img src="/public/img/Logo.png" height="80" alt="CONECTAPRO" />
+      </router-link>
+      </div>
         <h2 class="text-center text-primary mb-4">Recuperar Contraseña</h2>
         <form @submit.prevent="sendResetLink">
           <div class="mb-3">

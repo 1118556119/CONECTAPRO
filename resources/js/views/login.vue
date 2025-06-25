@@ -4,10 +4,13 @@
       <!-- Columna izquierda decorativa - visible solo en pantallas md y superiores -->
       <div class="col-md-6 d-none d-md-flex login-gradient align-items-center justify-content-center text-white">
         <div class="text-center px-4">
-          <i class="fas fa-tools fa-4x mb-4"></i>
-          <h1 class="display-4 fw-bold mb-4">CONECTAPRO</h1>
+          <div class="text-center mb-4">
+            <router-link class="navbar-brand" to="/">
+        <img src="/public/img/LogoBlanco.png" height="100" alt="CONECTAPRO" />
+      </router-link>
+          </div>
           <p class="lead">
-            Accede a tu cuenta para solicitar servicios de mantenimiento o administrar tu perfil profesional.
+            Conectando talentos tecnológicos con quienes más los necesitan
           </p>
         </div>
       </div>
@@ -16,9 +19,7 @@
       <div class="col-md-6 d-flex align-items-center justify-content-center">
         <!-- Botón para volver a la página principal -->
         <div class="position-absolute top-0 start-0 m-3">
-          <router-link to="/" class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i> Volver
-          </router-link>
+          
         </div>
         
         <div class="card border-0 shadow-lg" style="max-width: 450px; width: 100%;">
@@ -101,18 +102,7 @@
               </div>
               
               <!-- Iniciar sesión con redes sociales -->
-              <div class="row g-2 mb-3">
-                <div class="col">
-                  <button type="button" class="btn btn-outline-secondary w-100">
-                    <i class="fab fa-google me-2"></i> Google
-                  </button>
-                </div>
-                <div class="col">
-                  <button type="button" class="btn btn-outline-secondary w-100">
-                    <i class="fab fa-microsoft me-2"></i> Microsoft
-                  </button>
-                </div>
-              </div>
+              
             </form>
             
             <div class="text-center mt-4">
@@ -133,6 +123,20 @@
 <script>
 import axios from 'axios';
 import Swal from 'sweetalert2';
+// Añadir la importación del eventBus
+import { eventBus, AUTH_EVENTS } from '../utils/eventBus';
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer)
+    toast.addEventListener('mouseleave', Swal.resumeTimer)
+  }
+});
 
 export default {
   data() {
@@ -149,98 +153,114 @@ export default {
   },
   methods: {
     async login() {
+      if (!this.validateForm()) {
+        return;
+      }
+      
       try {
         this.isLoading = true;
         this.error = '';
         
-        // Validar formulario
-        if (!this.validateForm()) {
-          this.isLoading = false;
-          return;
-        }
-        
-        // Mostrar loading
-        Swal.fire({
-          title: 'Iniciando sesión...',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
-        });
-        
-        
-        // ✅ Solo log del email si es necesario para depuración
         console.log('Intentando login para:', this.form.email);
         
         const response = await axios.post('/login', {
           email: this.form.email,
-          password: this.form.password,
-          remember: this.form.remember
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
+          password: this.form.password
         });
-      
         
-        // ✅ Solo log del estado de éxito
-        console.log('Login exitoso para:', this.form.email);
+        // Inspeccionar la respuesta para depuración
+        console.log('Respuesta del servidor:', response.data);
         
-        if (response.data.success && response.data.data && response.data.data.token) {
-          // Guardar token y datos del usuario
-          localStorage.setItem('token', response.data.data.token);
-          localStorage.setItem('user_type', response.data.data.user_type);
-          localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        // Verificación más flexible de la respuesta
+        if (response.data) {
+          // Buscar el token en diferentes lugares de la respuesta
+          const token = response.data.token || 
+                        (response.data.data && response.data.data.token) || 
+                        response.data.access_token;
           
-          // Configurar el header de Authorization para futuras peticiones
-          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.data.token}`;
-          
-          // Cerrar loading
-          Swal.close();
-          
-          // Mostrar mensaje de éxito
-          await Swal.fire({
-            icon: 'success',
-            title: '¡Bienvenido!',
-            text: `Hola ${response.data.data.user.name}`,
-            timer: 2000,
-            showConfirmButton: false
-          });
-          
-          // Redirigir según tipo de usuario
-          if (response.data.data.user_type === 'technician') {
+          if (token) {
+            console.log('Login exitoso para:', this.form.email);
+            
+            // Guardar token
+            localStorage.setItem('token', token);
+            
+            // Guardar datos de usuario buscando en diferentes estructuras posibles
+            const userData = response.data.user || 
+                            response.data.data || 
+                            (response.data.data && response.data.data.user) || 
+                            {};
+                            
+            if (Object.keys(userData).length > 0) {
+              localStorage.setItem('user', JSON.stringify(userData));
+            }
+            
+            // Mostrar mensaje de éxito
+            Toast.fire({
+              icon: 'success',
+              title: '¡Bienvenido de nuevo!'
+            });
+            
+            // Emitir evento de login
+            try {
+              if (typeof eventBus !== 'undefined' && eventBus.emit) {
+                eventBus.emit(AUTH_EVENTS.LOGIN, userData);
+              }
+            } catch (eventError) {
+              console.warn('Error en eventBus:', eventError);
+            }
+            
+            // Redireccionar
             this.$router.push('/profile');
-          } else if (response.data.data.user_type === 'client') {
-            this.$router.push('/client-profile');
-          } else {
-            this.$router.push('/dashboard');
+            return; // Salir de la función después del éxito
           }
-          
-        } else {
-          throw new Error('Respuesta del servidor inválida');
         }
+        
+        // Si llegamos aquí es porque no se encontró un token válido
+        throw new Error('No se encontró un token de autenticación en la respuesta');
         
       } catch (error) {
-        Swal.close();
-        // ✅ Solo log de errores sin datos sensibles
-        console.error('Error en login:', error.response?.status || 'Error desconocido');
+        this.isLoading = false;
         
-        // Mostrar mensaje de error adecuado
-        if (error.response?.status === 401) {
-          this.error = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
-        } else if (error.response?.data?.message) {
-          this.error = error.response.data.message;
+        // Determinar el tipo de error
+        if (error.response && error.response.status === 422) {
+          const validationErrors = error.response.data.errors;
+          
+          // Crear mensaje de error de validación
+          let errorMessage = 'Por favor verifica los datos ingresados';
+          if (validationErrors) {
+            errorMessage = Object.values(validationErrors)
+              .flat()
+              .join('<br>');
+          }
+          
+          // Mostrar error con SweetAlert
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de validación',
+            html: errorMessage,
+            confirmButtonColor: '#3085d6'
+          });
+          
+        } else if (error.response && error.response.data) {
+          // Otros errores del servidor
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de autenticación',
+            text: error.response.data.message || 'Error al intentar iniciar sesión',
+            confirmButtonColor: '#3085d6'
+          });
         } else {
-          this.error = 'Error al conectar con el servidor. Inténtalo nuevamente.';
+          // Error general
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Ha ocurrido un problema al intentar iniciar sesión',
+            confirmButtonColor: '#3085d6'
+          });
         }
         
-        await Swal.fire({
-          icon: 'error',
-          title: 'Error de inicio de sesión',
-          text: this.error
-        });
-        
+        // Mantener el console.error para depuración
+        console.error('Error en login:', error);
       } finally {
         this.isLoading = false;
       }

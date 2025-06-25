@@ -11,7 +11,7 @@
 /* Estilos generales */
 body {
   font-family: var(--font-family);
-  background-color: var(--tech-gray);
+  background-color: var(--pastel-bg);
   color: var(--digital-black);
   line-height: 1.6;
   font-size: 16px;
@@ -60,6 +60,49 @@ body {
 
 .button:active {
   transform: translateY(0);
+}
+
+/* Hacer que todos los botones tengan color azul primario */
+
+/* Botones estándar */
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-secondary,
+.btn-info,
+.btn-accent,
+.btn-orange {
+  background-color: var(--tech-blue) !important;
+  border-color: var(--tech-blue) !important;
+  color: white !important;
+}
+
+/* Botones de contorno */
+.btn-outline-success,
+.btn-outline-warning,
+.btn-outline-danger,
+.btn-outline-secondary,
+.btn-outline-info,
+.btn-outline-accent,
+.btn-outline-orange {
+  border-color: var(--tech-blue) !important;
+  color: var(--tech-blue) !important;
+}
+
+.btn-outline-success:hover,
+.btn-outline-warning:hover,
+.btn-outline-danger:hover,
+.btn-outline-secondary:hover,
+.btn-outline-info:hover,
+.btn-outline-accent:hover,
+.btn-outline-orange:hover {
+  background-color: var(--tech-blue) !important;
+  color: white !important;
+}
+
+/* Conservar los efectos hover */
+.btn:hover {
+  opacity: 0.9;
 }
 
 /* Cards con sombras y efectos */
@@ -144,6 +187,42 @@ body {
 
 .fade-in {
   animation: fadeIn 0.5s ease-in;
+}
+
+/* Añadir estos estilos para notificaciones */
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 0.6rem !important;
+  padding: 0.25rem 0.4rem !important;
+}
+
+/* Animación para notificación nueva */
+@keyframes notification-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.notification-new {
+  animation: notification-pulse 0.3s ease-in-out;
+}
+
+/* Indicador de no leído */
+.notification-item.unread {
+  position: relative;
+}
+
+.notification-item.unread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: var(--signal-orange, #fd7e14);
 }
 
 @import 'bootstrap-icons/font/bootstrap-icons.css';

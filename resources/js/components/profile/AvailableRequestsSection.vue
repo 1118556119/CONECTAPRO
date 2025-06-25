@@ -205,44 +205,97 @@ export default {
 
     async viewDetails(request) {
       try {
+        // Obtener el token
         const token = localStorage.getItem('token');
-        const response = await axios.get(`/service-requests/${request.id}`, {
+        
+        // Mostrar indicador de carga
+        Swal.fire({
+          title: 'Cargando detalles...',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+        
+        // Modificar la ruta para seguir el mismo patrón que loadRequests
+        // En lugar de /technician/service-requests/${request.id}
+        const response = await axios.get(`/service-requests/details/${request.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         
-        if (response.data.success) {
-          const details = response.data.data;
+        // Cerrar indicador de carga
+        Swal.close();
+        
+        // Simplificar la extracción de datos
+        let details = null;
+        
+        if (response.data) {
+          // Primero intentar obtener directamente del request original
+          // Esto evita problemas de estructura de respuesta
+          details = request;
           
-          Swal.fire({
-            title: `Solicitud #${details.request_number}`,
-            html: `
-              <div class="text-left">
-                <p><strong>Cliente:</strong> ${details.client.name}</p>
-                <p><strong>Tipo de Servicio:</strong> ${this.getServiceTypeLabel(details.service_type)}</p>
-                <p><strong>Urgencia:</strong> <span class="badge ${this.getUrgencyBadgeClass(details.urgency_level)}">${this.getUrgencyLabel(details.urgency_level)}</span></p>
-                <p><strong>Equipo:</strong> ${this.getEquipmentTypeLabel(details.equipment_type)} - ${details.equipment_brand}</p>
-                <p><strong>Descripción:</strong> ${details.description}</p>
-                <p><strong>Dirección:</strong> ${details.service_address}, ${details.service_city}</p>
-                <p><strong>Fecha Preferida:</strong> ${details.preferred_date ? this.formatDate(details.preferred_date) : 'No especificada'}</p>
-                ${details.client_notes ? `<p><strong>Notas del Cliente:</strong> ${details.client_notes}</p>` : ''}
-              </div>
-            `,
-            width: '600px',
-            showCancelButton: true,
-            confirmButtonText: 'Postularme',
-            cancelButtonText: 'Cerrar',
-            confirmButtonColor: '#28a745'
-          }).then((result) => {
-            if (result.isConfirmed) {
-              this.applyToRequest(request);
-            }
-          });
+          // Añadir cualquier dato adicional de la respuesta si existe
+          if (response.data.data) {
+            details = { ...details, ...response.data.data };
+          } else if (typeof response.data === 'object') {
+            details = { ...details, ...response.data };
+          }
         }
+        
+        // Usar los datos originales de la solicitud en caso de que la API no devuelva nada útil
+        if (!details) {
+          details = request;
+        }
+        
+        // Mostrar el modal con los datos disponibles
+        const clientName = details.client?.name || 'No especificado';
+        const serviceType = this.getServiceTypeLabel(details.service_type || '');
+        const urgencyLevel = details.urgency_level || 'media';
+        const urgencyBadge = this.getUrgencyBadgeClass(urgencyLevel);
+        const urgencyLabel = this.getUrgencyLabel(urgencyLevel);
+        const equipmentType = this.getEquipmentTypeLabel(details.equipment_type || '');
+        const equipmentBrand = details.equipment_brand || 'No especificado';
+        const description = details.description || 'Sin descripción';
+        const serviceAddress = details.service_address || 'No especificada';
+        const serviceCity = details.service_city || '';
+        const preferredDate = details.preferred_date ? this.formatDate(details.preferred_date) : 'No especificada';
+        const clientNotes = details.client_notes || '';
+        
+        Swal.fire({
+          title: `Solicitud #${details.request_number || ''}`,
+          html: `
+            <div class="text-start">
+              <p><strong>Cliente:</strong> ${clientName}</p>
+              <p><strong>Tipo de Servicio:</strong> ${serviceType}</p>
+              <p><strong>Urgencia:</strong> <span class="badge ${urgencyBadge}">${urgencyLabel}</span></p>
+              <p><strong>Equipo:</strong> ${equipmentType} - ${equipmentBrand}</p>
+              <p><strong>Descripción:</strong> ${description}</p>
+              <p><strong>Dirección:</strong> ${serviceAddress}${serviceCity ? ', ' + serviceCity : ''}</p>
+              <p><strong>Fecha Preferida:</strong> ${preferredDate}</p>
+              ${clientNotes ? `<p><strong>Notas del Cliente:</strong> ${clientNotes}</p>` : ''}
+            </div>
+          `,
+          width: '600px',
+          showCancelButton: true,
+          confirmButtonText: 'Postularme',
+          cancelButtonText: 'Cerrar',
+          confirmButtonColor: '#28a745'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.applyToRequest(request);
+          }
+        });
       } catch (error) {
         console.error('Error al obtener detalles:', error);
-        Swal.fire('Error', 'No se pudieron obtener los detalles', 'error');
+        
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudieron obtener los detalles de la solicitud. Por favor, inténtalo de nuevo.',
+          icon: 'error',
+          confirmButtonText: 'Cerrar'
+        });
       }
     },
 

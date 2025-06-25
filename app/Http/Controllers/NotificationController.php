@@ -1,88 +1,63 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use App\Models\Notification;
+use Auth;
+use Carbon\Carbon;
 
 class NotificationController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    /**
+     * Obtener todas las notificaciones del usuario autenticado
+     */
+    public function index()
     {
-        try {
-            $user = $request->user();
-            
-            // Por ahora devolvemos un array vacío hasta que tengas la tabla de notificaciones
-            $notifications = [];
-            
-            return response()->json([
-                'success' => true,
-                'data' => $notifications,
-                'message' => 'Notificaciones obtenidas correctamente'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener notificaciones: ' . $e->getMessage()
-            ], 500);
-        }
+        $user = Auth::user();
+        $notifications = $user->notifications()
+            ->orderBy('created_at', 'desc')
+            ->take(20)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $notifications
+        ]);
     }
 
-    public function getUnreadCount(Request $request): JsonResponse
+    /**
+     * Marcar una notificación específica como leída
+     */
+    public function markAsRead($id)
     {
-        try {
-            $user = $request->user();
-            
-            // Por ahora devolvemos 0 hasta que tengas la tabla de notificaciones
-            $unreadCount = 0;
-            
-            return response()->json([
-                'success' => true,
-                'unread_count' => $unreadCount,
-                'message' => 'Contador de notificaciones obtenido correctamente'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al obtener contador de notificaciones: ' . $e->getMessage()
-            ], 500);
+        $user = Auth::user();
+        $notification = $user->notifications()->findOrFail($id);
+
+        if (!$notification->read_at) {
+            $notification->read_at = Carbon::now();
+            $notification->save();
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notificación marcada como leída'
+        ]);
     }
 
-    public function markAsRead(Request $request, $id): JsonResponse
+    /**
+     * Marcar todas las notificaciones como leídas
+     */
+    public function markAllAsRead()
     {
-        try {
-            // Por ahora solo devolvemos éxito
-            return response()->json([
-                'success' => true,
-                'message' => 'Notificación marcada como leída'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al marcar notificación como leída: ' . $e->getMessage()
-            ], 500);
-        }
-    }
+        $user = Auth::user();
+        $user->notifications()
+            ->whereNull('read_at')
+            ->update(['read_at' => Carbon::now()]);
 
-    public function markAllAsRead(Request $request): JsonResponse
-    {
-        try {
-            // Por ahora solo devolvemos éxito
-            return response()->json([
-                'success' => true,
-                'message' => 'Todas las notificaciones marcadas como leídas'
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al marcar todas las notificaciones como leídas: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Todas las notificaciones marcadas como leídas'
+        ]);
     }
 }

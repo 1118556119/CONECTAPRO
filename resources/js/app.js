@@ -4,6 +4,7 @@ import router from './router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import App from './App.vue'; 
+import NotificationsDropdown from './components/NotificationsDropdown.vue';
 
 // Importar CSS (verificar orden)
 import '../css/variables.css';  // PRIMERO variables CSS
@@ -44,6 +45,8 @@ const app = createApp(App);
 
 app.config.globalProperties.$axios = axios;
 app.config.globalProperties.$swal = Swal;
+
+app.component('notifications-dropdown', NotificationsDropdown);
 
 app.use(router);
 app.mount('#app');

@@ -79,44 +79,6 @@
 
       <!-- Contenido principal -->
       <div class="col-md-9 col-lg-10">
-        <!-- Header simplificado -->
-        <div class="bg-white border-bottom p-3 sticky-top">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h4 class="mb-0">Mi Perfil</h4>
-              <small class="text-muted">Gestiona tu información personal</small>
-            </div>
-            
-            <div class="d-flex align-items-center gap-2">
-              <!-- Botón de notificaciones -->
-              <button @click="showNotifications" class="btn btn-outline-primary btn-sm position-relative">
-                <i class="fas fa-bell"></i>
-                <span v-if="unreadNotifications > 0" 
-                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style="font-size: 0.65rem; padding: 0.25rem 0.4rem;">
-                  {{ unreadNotifications }}
-                </span>
-              </button>
-              
-              <!-- Botón página principal -->
-              <button @click="goToHome" class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-home me-1"></i>Inicio
-              </button>
-              
-              <!-- Botón cerrar sesión -->
-              <button @click="logout" class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
-              </button>
-              
-              <!-- Botón refresh -->
-              <button @click="fetchProfile" :disabled="globalLoading" 
-                      class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-sync-alt" :class="{ 'fa-spin': globalLoading }"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Loading global -->
         <div v-if="globalLoading" class="d-flex justify-content-center align-items-center" 
              style="height: 60vh;">
@@ -190,15 +152,7 @@
             <MyWorkSection />
           </div>
 
-          <!-- Mensaje de sección no disponible -->
-          <div v-if="!isValidSection" class="text-center py-5">
-            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-            <h5 class="text-muted">Sección no disponible</h5>
-            <p class="text-muted">Esta sección no está disponible para tu tipo de usuario.</p>
-            <button @click="activeSection = 'personal'" class="btn btn-primary">
-              Ir a Datos Personales
-            </button>
-          </div>
+          
         </div>
       </div>
     </div>
@@ -258,6 +212,7 @@ import ServicesSection from './profile/ServicesSection.vue';
 import MyServicesSection from './profile/MyServicesSection.vue';
 import AvailableRequestsSection from './profile/AvailableRequestsSection.vue'; // NUEVO IMPORT
 import MyWorkSection from './profile/MyWorkSection.vue'; // NUEVO IMPORT
+import { eventBus, AUTH_EVENTS } from '../utils/eventBus';
 
 // Interceptor para manejar errores de autenticación
 axios.interceptors.response.use(
@@ -349,25 +304,14 @@ export default {
 
   // ✅ MODIFICAR el método mounted para cargar la foto desde localStorage
   async mounted() {
-    // ✅ CARGAR FOTO DESDE LOCALSTORAGE - NUEVO
+    // Eliminar mensaje de debug
     const savedPhoto = localStorage.getItem('userPhoto');
     if (savedPhoto) {
       this.localPhotoBase64 = savedPhoto;
-      console.log('📸 Foto recuperada desde localStorage');
     }
     
     await this.fetchProfile();
     await this.fetchNotifications();
-    
-    // Debug: Ver qué contiene la foto
-    this.$nextTick(() => {
-      console.log('🔍 Debug foto:', {
-        photo: this.profileData.photo,
-        photoType: typeof this.profileData.photo,
-        isBase64: this.profileData.photo?.startsWith('data:image'),
-        photoLength: this.profileData.photo?.length
-      });
-    });
   },
 
   methods: {
@@ -1116,6 +1060,9 @@ export default {
           localStorage.removeItem('user');
           localStorage.removeItem('userPhoto');
           localStorage.removeItem('readNotifications');
+          
+          // Emitir evento
+          eventBus.emit(AUTH_EVENTS.LOGOUT);
           
           this.$router.push('/login');
         }

@@ -4,6 +4,7 @@
   --circuit-green: #01A66F;
   --digital-black: #212529;
   --tech-gray: #F1F3F5;
+  --pastel-bg: #F0F8FF;
   
   /* Acentos Tecnológicos - Mejorados para mayor contraste */
   --signal-orange: #FF6B35;
@@ -208,6 +209,39 @@ body.technician-mode {
 .notification-badge {
   background-color: var(--signal-orange);
   color: white;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 0.6rem;
+  padding: 0.25rem 0.4rem;
+}
+
+.notification-item.unread {
+  position: relative;
+}
+
+.notification-item.unread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background-color: var(--signal-orange);
+}
+
+/* Animación para notificación nueva */
+@keyframes notification-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.notification-new {
+  animation: notification-pulse 0.3s ease-in-out;
 }
 
 /* Iconos tecnológicos */

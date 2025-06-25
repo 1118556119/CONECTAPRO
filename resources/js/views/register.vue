@@ -3,16 +3,15 @@
     <div class="row min-vh-100">
       <!-- Panel izquierdo decorativo - solo visible en pantallas md y superiores -->
       <div class="col-lg-5 d-none d-lg-flex register-gradient position-relative overflow-hidden">
-        <!-- Decoración de fondo -->
-        <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
-          <div class="position-absolute top-50 start-50 translate-middle">
-            <i class="fas fa-tools fa-10x text-white opacity-25"></i>
-          </div>
-        </div>
-
-        <!-- Contenido del panel -->
+       
+        <!-- logo -->
         <div class="d-flex flex-column justify-content-center text-white p-5 position-relative">
-          <h1 class="display-4 fw-bold mb-4">Únete a nuestra comunidad</h1>
+          <div class="text-center mb-4">
+            <router-link class="navbar-brand" to="/">
+        <img src="/public/img/LogoBlanco.png" height="100" alt="CONECTAPRO" />
+      </router-link>
+          </div>
+          
           <p class="lead mb-4">
             Regístrate para acceder a servicios de mantenimiento técnico profesional para tus equipos.
           </p>
@@ -45,14 +44,9 @@
       <!-- Panel del formulario -->
       <div class="col-lg-7 d-flex align-items-center justify-content-center py-5">
         <!-- Botón para volver a la página principal -->
-        <div class="position-absolute top-0 start-0 m-4">
-          <router-link to="/" class="btn btn-outline-primary rounded-pill">
-            <i class="fas fa-arrow-left me-2"></i> Volver al inicio
-          </router-link>
-        </div>
-
+        
         <div class="card border-0 shadow-lg p-4 register-card" style="max-width: 600px; width: 100%;">
-          <div class="card-body p-3 p-md-4">
+          <div class="card-body p-2 p-md-2">
             <h2 class="text-center text-primary mb-4 fw-bold register-title">
               <i class="fas fa-user-plus me-2"></i> Crear nueva cuenta
             </h2>
@@ -66,7 +60,7 @@
 
             <!-- Formulario de registro manual -->
             <form @submit.prevent="register" class="needs-validation">
-              <div class="row g-3 mb-3">
+              <div class="row g-2 mb-2">
                 <!-- Datos personales -->
                 <h5 class="col-12 fw-bold text-primary mb-0 border-bottom pb-2 form-section-title">
                   <i class="fas fa-user me-2"></i> Datos personales
@@ -249,15 +243,6 @@
                   o regístrate con
                 </span>
               </div>
-            </div>
-
-            <!-- Registro con Google -->
-            <div class="d-grid mb-4">
-              <button @click="registerWithGoogle"
-                class="btn btn-lg btn-outline-danger d-flex align-items-center justify-content-center"
-                :disabled="!form.user_type">
-                <i class="fab fa-google me-3 fa-lg"></i> Continuar con Google
-              </button>
             </div>
 
             <div class="text-center mt-4">

@@ -10,6 +10,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TechnicianProfileController;
 use App\Http\Controllers\EmailVerificationController;
 
+
 // Rutas públicas
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -72,4 +73,14 @@ Route::middleware('auth:sanctum')->group(function () {
 // Rutas de salud/estado del API
 Route::get('/health', function() {
     return response()->json(['status' => 'ok', 'timestamp' => now()]);
+});
+
+// Agregar estas rutas con el middleware 'auth:api'
+Route::middleware('auth:sanctum')->group(function () {
+    // Rutas existentes...
+    
+    // Notificaciones
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 });

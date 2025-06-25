@@ -1,151 +1,31 @@
 <template>
   <div>
-    <!-- Barra de navegación -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm fixed-top">
-      <div class="container">
-        <a class="navbar-brand text-primary fw-bold" href="#">
-          <i class="fas fa-tools"></i> CONECTAPRO
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <!-- Enlaces de navegación principal -->
-            <li class="nav-item">
-              <a href="#servicios" class="nav-link">Servicios</a>
-            </li>
-            <li class="nav-item">
-              <a href="#como-funciona" class="nav-link">Cómo Funciona</a>
-            </li>
-            <li class="nav-item">
-              <a href="#faq" class="nav-link">Preguntas Frecuentes</a>
-            </li>
-            <li class="nav-item">
-              <a href="#contacto" class="nav-link">Contacto</a>
-            </li>
-            
-            <!-- Para usuarios autenticados - Solicitar servicio -->
-            <li class="nav-item" v-if="isLoggedIn">
-              <router-link to="/solicitar-servicio" class="nav-link btn btn-primary text-white px-3 mx-2">
-                <i class="fas fa-plus-circle me-1"></i> Solicitar Servicio
-              </router-link>
-            </li>
-          </ul>
-          
-          <!-- Botones de autenticación -->
-          <ul class="navbar-nav ms-auto">
-            <!-- Si el usuario NO está autenticado -->
-            <template v-if="!isLoggedIn">
-              <li class="nav-item">
-                <router-link
-                  to="/login"
-                  class="btn btn-outline-primary me-2 d-flex align-items-center gap-2"
-                >
-                  <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                </router-link>
-              </li>
-              <li class="nav-item">
-                <router-link
-                  to="/register"
-                  class="btn btn-outline-success d-flex align-items-center gap-2"
-                >
-                  <i class="fas fa-user-plus"></i> Registrarse
-                </router-link>
-              </li>
-            </template>
-            
-            <!-- Si el usuario está autenticado -->
-            <template v-else>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fas fa-user-circle me-1"></i> Mi Cuenta
-                  <!-- Badge de notificaciones -->
-                  <span v-if="unreadNotifications > 0" class="badge bg-danger ms-1" style="font-size: 0.6rem;">
-                    {{ unreadNotifications }}
-                  </span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                  <li>
-                    <router-link to="/profile" class="dropdown-item">
-                      <i class="fas fa-id-card me-2"></i> Mi Perfil
-                      <span v-if="unreadNotifications > 0" class="badge bg-primary ms-2">{{ unreadNotifications }}</span>
-                    </router-link>
-                  </li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li>
-                    <a class="dropdown-item text-danger" href="#" @click.prevent="logout">
-                      <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </template>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Contenido principal -->
-    <div class="container py-5 mt-5">
+    <!-- Contenido principal - mantener todo lo demás igual -->
+    <div class="container py-3 mt-3">
       <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-primary">
-          Bienvenido al Servicio de Mantenimiento de Computadores
+        <h1 class="display-4 fw-bold">
+          <span class="text-primary">¿Problemas con tu equipo?</span><br>
+          <span class="mt-2 d-block text-primary">Tenemos la Solución</span>
         </h1>
-        <p class="lead text-secondary">
-          Solicita servicios de mantenimiento correctivo, preventivo o instalación de programas a domicilio.
-        </p>
         
-        <!-- Botón destacado para solicitar servicio -->
-        <div class="mt-4">
-          <router-link 
-            v-if="isLoggedIn" 
-            to="/solicitar-servicio" 
-            class="btn btn-accent btn-lg px-4 py-2 fw-bold shadow-sm"
-          >
-            <i class="fas fa-clipboard-check me-2"></i>
-            Solicitar Servicio Ahora
-          </router-link>
-          
-          <router-link 
-            v-else 
-            to="/register" 
-            class="btn btn-accent btn-lg px-4 py-2 fw-bold shadow-sm"
-          >
-            <i class="fas fa-user-plus me-2"></i>
-            Crear Cuenta Gratis
-          </router-link>
-        </div>
+        <p class="lead">
+          Reparaciones rápidas, mantenimiento preventivo y soporte técnico<br>
+          <span class="badge bg-primary px-3 py-2 mt-2">A domicilio en toda la ciudad</span>
+        </p>
+      </div>
 
-        <!-- Botones principales para usuarios autenticados -->
-        <div class="mt-4" v-if="isLoggedIn">
-          <!-- Para clientes -->
-          <router-link 
-            v-if="userType === 'client'" 
-            to="/solicitar-servicio" 
-            class="btn btn-primary btn-lg px-4 py-2 fw-bold shadow"
-          >
-            <i class="fas fa-clipboard-check me-2"></i>
-            Solicitar Servicio Ahora
-          </router-link>
-          
-          <!-- Para técnicos -->
-          <router-link 
-            v-if="userType === 'technician'" 
-            to="/solicitudes-disponibles" 
-            class="btn btn-success btn-lg px-4 py-2 fw-bold shadow"
-          >
-            <i class="fas fa-tools me-2"></i>
-            Ver Solicitudes Disponibles
-          </router-link>
+      <!-- Nueva sección: Marquee Digital -->
+      <div class="digital-marquee mb-5">
+        <div class="digital-screen p-4 turquoise-gradient rounded shadow-lg">
+          <div class="screen-content text-center p-4 border border-light border-opacity-25 border-2 rounded">
+            <span class="status-text d-block mb-2">// SISTEMA ACTIVO //</span>
+            <h1 class="display-4 fw-bold text-white digital-text">
+              CONECTA<span class="text-warning">PRO</span>
+            </h1>
+            <p class="lead text-white mb-0">
+              <span class="typing-effect">Soporte técnico especializado para tus equipos</span>
+            </p>            
+          </div>
         </div>
       </div>
 
@@ -792,6 +672,34 @@
           </div>
         </div>
       </div>
+
+      <!-- Nueva sección: Testimonios Rotativos -->
+      <div class="welcome-testimonial-carousel text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary mb-4">
+          Servicio Técnico de Confianza
+        </h1>
+        
+        <div class="testimonial-slider">
+          <transition-group name="fade" tag="div">
+            <div v-if="currentTestimonial === 0" key="0" class="testimonial-item">
+              <p class="lead text-secondary">"Solucionaron mi problema en menos de 2 horas. ¡Increíble servicio!"</p>
+              <div class="user-rating text-warning">★★★★★</div>
+            </div>
+            
+            <div v-if="currentTestimonial === 1" key="1" class="testimonial-item">
+              <p class="lead text-secondary">"Mi computadora funciona como nueva después del mantenimiento."</p>
+              <div class="user-rating text-warning">★★★★★</div>
+            </div>
+            
+            <div v-if="currentTestimonial === 2" key="2" class="testimonial-item">
+              <p class="lead text-secondary">"Técnicos profesionales y precios justos. Totalmente recomendado."</p>
+              <div class="user-rating text-warning">★★★★★</div>
+            </div>
+          </transition-group>
+        </div>
+        
+        <!-- Botones existentes... -->
+      </div>
     </div>
 
     <!-- Pie de página -->
@@ -844,15 +752,15 @@
             <ul class="list-unstyled">
               <li class="mb-2">
                 <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                <span class="text-muted">Av. Siempre Viva 123, Quito, Ecuador</span>
+                <span class="text-muted">Yopal - Casanare</span>
               </li>
               <li class="mb-2">
                 <i class="fas fa-phone-alt text-primary me-2"></i>
-                <span class="text-muted">+593 98 765 4321</span>
+                <span class="text-muted">+57 123 456 78 90</span>
               </li>
               <li class="mb-2">
                 <i class="fas fa-envelope text-primary me-2"></i>
-                <span class="text-muted">info@mantenimiento.com</span>
+                <span class="text-muted">appejemplo6119@gmail.com</span>
               </li>
               <li class="mb-2">
                 <i class="fas fa-clock text-primary me-2"></i>
@@ -900,14 +808,33 @@
 <script>
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import Navbar from '../components/Navbar.vue'; // Importar el componente Navbar
 
 export default {
   name: 'Home',
+  components: {
+    Navbar // Registrar el componente
+  },
   data() {
     return {
       isLoggedIn: false,
       unreadNotifications: 0,
-      userType: '' // Nuevo dato para el tipo de usuario
+      userType: '',
+      currentTestimonial: 0, // Nuevo dato para el testimonio actual
+      testimonials: [ // Arreglo de testimonios
+        {
+          text: "Solucionaron mi problema en menos de 2 horas. ¡Increíble servicio!",
+          rating: 5
+        },
+        {
+          text: "Mi computadora funciona como nueva después del mantenimiento.",
+          rating: 5
+        },
+        {
+          text: "Técnicos profesionales y precios justos. Totalmente recomendado.",
+          rating: 5
+        }
+      ]
     };
   },
   methods: {
@@ -915,7 +842,6 @@ export default {
       const token = localStorage.getItem('token');
       this.isLoggedIn = !!token;
       
-      // Si está logueado, verificar notificaciones y tipo de usuario
       if (this.isLoggedIn) {
         this.checkNotifications();
         this.getUserType();
@@ -993,10 +919,21 @@ export default {
           this.userType = ''; // Reiniciar tipo de usuario
         }
       });
+    },
+    
+    // Nuevo método para cambiar el testimonio actual
+    changeTestimonial(direction) {
+      const total = this.testimonials.length;
+      this.currentTestimonial = (this.currentTestimonial + direction + total) % total;
     }
   },
   created() {
     this.checkLoginStatus();
+    
+    // Cambiar testimonio cada 5 segundos
+    setInterval(() => {
+      this.changeTestimonial(1);
+    }, 5000);
   }
 };
 </script>
@@ -1081,6 +1018,99 @@ export default {
 /* Estilos para scrolling suave */
 html {
   scroll-behavior: smooth;
+}
+
+/* Animación de typing para el mensaje digital */
+.typing-effect {
+  overflow: hidden;
+  border-right: 0.15em solid #ffffff;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.1em;
+  animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #ffffff }
+}
+
+/* Estilo para panel digital con el gradiente turquesa de la imagen */
+.digital-marquee {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.turquoise-gradient {
+  background: linear-gradient(to right, #005670, #0099aa, #00b3c7);
+  box-shadow: 0 10px 30px rgba(0, 90, 112, 0.5) !important;
+}
+
+.digital-text {
+  font-family: 'Courier New', monospace;
+  letter-spacing: -1px;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+.status-text {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #77dd77; /* Verde claro para el mensaje de estado */
+  text-shadow: 0 0 8px rgba(119, 221, 119, 0.8);
+}
+
+/* Efecto de brillo suave para simular pantalla digital */
+.screen-content {
+  position: relative;
+  overflow: hidden;
+}
+
+.screen-content::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shine 5s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100% }
+  20% { left: 100% }
+  100% { left: 100% }
+}
+
+/* Transición para testimonios */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+/* Estilos para la insignia de bienvenida */
+.welcome-badge {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 
 /* Ajustes para dispositivos móviles */

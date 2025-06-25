@@ -2,6 +2,11 @@
   <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h4><i class="fas fa-clipboard-list me-2 text-primary"></i>Mis Servicios Solicitados</h4>
+      
+      <!-- Botón prominente para solicitar servicio -->
+      <router-link to="/solicitar-servicio" class="btn btn-accent">
+        <i class="fas fa-plus me-1"></i>Solicitar Nuevo Servicio
+      </router-link>
     </div>
 
     <!-- Filtros y búsqueda -->
@@ -51,19 +56,19 @@
       <p class="mt-2 text-muted">Cargando tus solicitudes...</p>
     </div>
 
-    <!-- No hay solicitudes -->
+    <!-- No hay solicitudes - Modificado para añadir botón más prominente -->
     <div v-else-if="filteredRequests.length === 0" class="text-center py-5">
       <div class="mb-3">
         <i class="fas fa-clipboard-list fa-4x text-muted"></i>
       </div>
       <h5 class="text-muted">No tienes solicitudes de servicio</h5>
-      <p class="text-muted">Cuando solicites un servicio, aparecerá aquí.</p>
-      <router-link to="/solicitar-servicio" class="btn btn-primary">
-        <i class="fas fa-plus me-1"></i>Solicitar Servicio Ahora
+      <p class="text-muted">¡Es momento de solicitar tu primer servicio técnico!</p>
+      <router-link to="/solicitar-servicio" class="btn btn-accent btn-lg mt-2">
+        <i class="fas fa-plus me-2"></i>Solicitar Servicio Ahora
       </router-link>
     </div>
 
-    <!-- Lista de solicitudes -->
+    <!-- Lista de solicitudes - Sin cambios -->
     <div v-else class="row">
       <div v-for="request in filteredRequests" :key="request.id" class="col-12 mb-4">
         <div class="card h-100" :class="getStatusBorderClass(request.status)">
@@ -176,8 +181,8 @@
                   </button>
                   
                   <button 
-                    v-if="request.status === 'completed' && !request.review"
-                    @click="leaveReview(request)"
+                    v-if="request.status === 'completed' && !request.review" 
+                    @click="leaveReview(request)" 
                     class="btn btn-warning btn-sm"
                   >
                     <i class="fas fa-star me-1"></i>
@@ -386,9 +391,70 @@ export default {
       }
     },
 
-    // Continúo con todos los demás métodos...
     async rejectQuote(request) {
-      // Mismo código que MyServiceRequests.vue...
+      const result = await Swal.fire({
+        title: '¿Rechazar Cotización?',
+        html: `
+          <div class="text-center">
+            <div class="mb-3">
+              <i class="fas fa-times-circle fa-3x text-danger mb-3"></i>
+            </div>
+            <p>¿Estás seguro de rechazar la cotización de ${request.technician?.name || 'este técnico'}?</p>
+            <div class="alert alert-warning">
+              <strong>Cotización:</strong> $${this.formatCurrency(request.quoted_price)}
+            </div>
+            <div class="form-group">
+              <label for="reject-reason" class="form-label">Motivo del rechazo (opcional):</label>
+              <textarea id="reject-reason" class="form-control" rows="2" placeholder="Explica por qué rechazas esta cotización..."></textarea>
+            </div>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, rechazar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        preConfirm: () => {
+          return {
+            reason: document.getElementById('reject-reason').value
+          };
+        }
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.post(`/service-requests/${request.id}/reject-quote`, 
+            { reason: result.value.reason },
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            }
+          );
+
+          if (response.data.success) {
+            await Swal.fire({
+              title: 'Cotización Rechazada',
+              text: 'La cotización ha sido rechazada correctamente',
+              icon: 'success',
+              confirmButtonText: 'Entendido'
+            });
+            
+            this.loadRequests(); // Recargar las solicitudes
+          }
+        } catch (error) {
+          console.error('Error al rechazar cotización:', error);
+          
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo rechazar la cotización. Inténtalo de nuevo.',
+            icon: 'error',
+            confirmButtonText: 'Entendido'
+          });
+        }
+      }
     },
 
     async viewTechnicianProfile(request) {
@@ -400,7 +466,140 @@ export default {
     },
 
     async leaveReview(request) {
-      // Mismo código que MyServiceRequests.vue...
+      const { value: formValues } = await Swal.fire({
+        title: 'Calificar Servicio',
+        html: `
+          <div class="mb-4">
+            <h5 class="text-center mb-3">¿Cómo calificas el servicio de ${request.technician?.name || 'este técnico'}?</h5>
+            <div class="rating-container text-center">
+              <div class="star-rating">
+                <input type="radio" id="star5" name="rating" value="5">
+                <label for="star5" title="5 estrellas">★</label>
+                <input type="radio" id="star4" name="rating" value="4">
+                <label for="star4" title="4 estrellas">★</label>
+                <input type="radio" id="star3" name="rating" value="3" checked>
+                <label for="star3" title="3 estrellas">★</label>
+                <input type="radio" id="star2" name="rating" value="2">
+                <label for="star2" title="2 estrellas">★</label>
+                <input type="radio" id="star1" name="rating" value="1">
+                <label for="star1" title="1 estrella">★</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="review-comment" class="form-label text-start d-block">Comentarios</label>
+            <textarea id="review-comment" class="form-control" rows="3" placeholder="¿Qué te pareció el servicio?"></textarea>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="review-pros" class="form-label text-start d-block">Aspectos positivos</label>
+              <textarea id="review-pros" class="form-control" rows="2" placeholder="Lo que más te gustó..."></textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="review-cons" class="form-label text-start d-block">Aspectos a mejorar</label>
+              <textarea id="review-cons" class="form-control" rows="2" placeholder="Lo que podría mejorar..."></textarea>
+            </div>
+          </div>
+          
+          <div class="form-check text-start">
+            <input class="form-check-input" type="checkbox" id="recommend-check" checked>
+            <label class="form-check-label" for="recommend-check">
+              Recomendaría a este técnico
+            </label>
+          </div>
+        `,
+        customClass: {
+          input: 'form-control'
+        },
+        didOpen: () => {
+          // Aplicar estilos CSS directamente
+          const style = document.createElement('style');
+          style.textContent = `
+            .star-rating {
+              display: inline-flex;
+              flex-direction: row-reverse;
+              font-size: 2.5rem;
+            }
+            .star-rating input {
+              display: none;
+            }
+            .star-rating label {
+              color: #ddd;
+              cursor: pointer;
+              padding: 0 0.2rem;
+              transition: color 0.3s;
+            }
+            .star-rating label:hover,
+            .star-rating label:hover ~ label,
+            .star-rating input:checked ~ label {
+              color: #ffc107;
+            }
+          `;
+          document.head.appendChild(style);
+        },
+        preConfirm: () => {
+          const rating = document.querySelector('input[name="rating"]:checked').value;
+          const comment = document.getElementById('review-comment').value;
+          const pros = document.getElementById('review-pros').value;
+          const cons = document.getElementById('review-cons').value;
+          const isRecommended = document.getElementById('recommend-check').checked;
+          
+          if (!rating) {
+            Swal.showValidationMessage('Por favor selecciona una calificación');
+            return false;
+          }
+          
+          return {
+            overall_rating: parseInt(rating),
+            comment: comment,
+            pros: pros,
+            cons: cons,
+            is_recommended: isRecommended
+          };
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Enviar calificación',
+        cancelButtonText: 'Cancelar',
+        width: '600px'
+      });
+      
+      if (formValues) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await axios.post('/reviews', {
+            service_request_id: request.id,
+            technician_id: request.technician_id,
+            ...formValues
+          }, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.data.success) {
+            Swal.fire({
+              title: '¡Gracias por tu evaluación!',
+              text: 'Tu calificación ha sido enviada correctamente.',
+              icon: 'success',
+              confirmButtonText: 'Aceptar'
+            });
+            
+            // Recargar las solicitudes para actualizar el estado
+            this.loadRequests();
+          }
+        } catch (error) {
+          console.error('Error al enviar calificación:', error);
+          
+          Swal.fire({
+            title: 'Error',
+            text: error.response?.data?.message || 'No se pudo enviar la calificación',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
+        }
+      }
     },
     
     // Helper methods
@@ -533,4 +732,20 @@ export default {
 .border-orange {
   border-color: #fd7e14 !important;
 }
+
+.btn-accent {
+  background-color: var(--signal-orange);
+  border-color: var(--signal-orange);
+  color: white;
+}
+
+.btn-accent:hover,
+.btn-accent:focus {
+  background-color: #e5602f;
+  border-color: #e5602f;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
 </style>
